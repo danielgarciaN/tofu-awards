@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/auth/Login';
-import PasswordPrompt from './components/auth/PasswordPromt';
+import Login from './components/auth/Login/Login';
+import PasswordPrompt from './components/auth/PasswordPromt/PasswordPromt';
 import Home from './components/home/home'; // Asumiendo que tienes un componente Home
 
 const App = () => {
