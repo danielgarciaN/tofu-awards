@@ -1,12 +1,9 @@
-// src/components/auth/Login.js
-
 import React, { useState } from "react";
-import { initializeApp } from "firebase/app"; // Importa la inicialización de Firebase
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"; // Importa las funciones necesarias de Firebase Auth
-import { getFirestore, doc, setDoc } from "firebase/firestore"; // Importa Firestore
+import { initializeApp } from "firebase/app"; 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "firebase/auth"; 
+import { getFirestore, doc, setDoc } from "firebase/firestore"; 
+import imageG from "./../../../assets/google.svg"; 
 import './Login.css';
-import SignInForm from "./SignInForm"; // Importa tu componente de inicio de sesión
-import SignUpForm from "./SignUpForm"; // Importa tu componente de registro
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -22,41 +19,145 @@ const firebaseConfig = {
 // Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app); // Inicializa Firestore
+const db = getFirestore(app); 
 
 const Login = () => {
-  const [type, setType] = useState("signIn");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Nuevo estado para confirmación de contraseña
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLogin, setIsLogin] = useState(true); 
+  const [message, setMessage] = useState(""); 
 
-  const handleOnClick = (text) => {
-    if (text !== type) {
-      setType(text);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("Usuario autenticado:", user);
+      alert(`Login successful! User: ${user.email}`);
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error.message);
+      alert("Error al iniciar sesión");
     }
   };
 
-  const containerClass = "container " + (type === "signUp" ? "right-panel-active" : "");
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    
+    // Verifica que las contraseñas coincidan
+    if (password !== confirmPassword) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Guardar información adicional en Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        createdAt: new Date(),
+      });
+
+      console.log("Usuario registrado:", user);
+      alert(`Signup successful! User: ${user.email}`);
+    } catch (error) {
+      console.error("Error al registrarse:", error.message);
+      alert("Error al registrarse");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Email de restablecimiento de contraseña enviado");
+    } catch (error) {
+      console.error("Error al enviar el email de restablecimiento:", error.message);
+      alert("Error al enviar el email de restablecimiento");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("Usuario autenticado con Google:", user);
+      alert(`Login successful with Google! User: ${user.email}`);
+    } catch (error) {
+      console.error("Error al iniciar sesión con Google:", error.message);
+      alert("Error al iniciar sesión con Google");
+    }
+  };
 
   return (
-    <div className="App">
-      <h2>Formulario de Ingreso/Registro</h2>
-      <div className={containerClass} id="container">
-        <SignUpForm switchToSignIn={() => handleOnClick("signIn")} auth={auth} db={db} />
-        <SignInForm switchToSignUp={() => handleOnClick("signUp")} auth={auth} />
-        <div className="overlay-container">
-          <div className="overlay">
-            <div className="overlay-panel overlay-left">
-              <h1>¡Bienvenido de nuevo!</h1>
-              <p>Para mantenerte conectado, inicia sesión con tu información personal</p>
-              <button className="ghost" id="signIn" onClick={() => handleOnClick("signIn")}>
-                Iniciar Sesión
-              </button>
+    <div className="login-page">
+      <video autoPlay loop muted className="video-background">
+        <source src={require('./../../../assets/videos/login.mp4')} type="video/mp4" />
+        Tu navegador no soporta el elemento de video.
+      </video>
+      <div className="login-container">
+        <div className="login-form">
+          <h2>{isLogin ? "Iniciar Sesión" : "Registrarse"}</h2>
+          <form onSubmit={isLogin ? handleLogin : handleSignup}>
+            <div className="input-field">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-            <div className="overlay-panel overlay-right">
-              <h1>¡Hola, amigo!</h1>
-              <p>Ingresa tus datos personales y comienza tu viaje con nosotros</p>
-              <button className="ghost" id="signUp" onClick={() => handleOnClick("signUp")}>
-                Crear Cuenta
-              </button>
+            <div className="input-field">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <i className={`eye-icon ${showPassword ? "bx bx-show" : "bx bx-hide"}`} onClick={togglePasswordVisibility}></i>
             </div>
+            {!isLogin && ( // Campo de confirmación de contraseña solo en el registro
+              <div className="input-field">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <i className={`eye-icon ${showPassword ? "bx bx-show" : "bx bx-hide"}`} onClick={togglePasswordVisibility}></i>
+              </div>
+            )}
+            <div className="form-link">
+              <a href="#" className="forgot-pass" onClick={handleResetPassword}>¿Olvidaste la contraseña?</a>
+            </div>
+            <div className="button-field">
+              <button type="submit">{isLogin ? "Iniciar Sesión" : "Registrarse"}</button>
+            </div>
+          </form>
+          <div className="form-link">
+            <span>
+              {isLogin ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"} 
+              <a href="#" className="signup-link" onClick={() => setIsLogin(!isLogin)}>
+                {isLogin ? "Registrate" : "Iniciar Sesión"}
+              </a>
+            </span>
+          </div>
+          <div className="divider">O</div>
+          <div className="social-login">
+            <button className="google-login" onClick={handleGoogleLogin}>
+              <img src={imageG} alt="Google" style={{ width: '40px', marginRight: '0.5rem' }} />
+              Iniciar sesión con Google
+            </button>
           </div>
         </div>
       </div>
