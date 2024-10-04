@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "tofu-awards",
+  "private_key_id": "c012376792a44a7bfa2cad9300dbf194ba266667",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCRCNdugRUsDZF7\nFMXlaeyPBk1/duCLomzYTC9xLduI/6mPW+eodjug4i+zFjR1KO4x+IxKAnOa4BqH\nUzsJ7j0UJJbYnLZFLiXuW+cCskJ/xU2XnpNBMnlD9xqgn/VVLlVswXCRQlvWdpI0\nnuaBnJoBko0dxZyXCiuDlVxRcsE/+XZBi/5a/mELALtWnqmkVjT5vy2vbl8/M+7J\nu51/C/2NQnNhO9CfZRX8Pdxkm6mzleg3tZHi2AriFS9MeLe52ENp/PIl6xAodXmo\n44CWWhdVHJuGUM0o0JWzck4oC9Q2k97pfziji7sCnk3gP2Lef/8I5ig1CoT2ymeh\n0pXRpXyvAgMBAAECggEAOSwVlGuRF4kPuMejDUD4rhbLdPw9Hv47zvYVW5W6rWIv\nCqKtitR0xAJ10DBoJGkqoIs8bi5SORKvknnmU49VB3w29JOuLE45SKF0yrTPjwON\nhz/NB43ojLi7h+cWdGor5Y/JmpFgl4WtM84RyrUbZpRJSZutE0NAjQHTXw4QDPHn\nIvKkxs4SUej9kyl0TwQgLlR+7m6dHoeiRQgDvc9+xsKj6/JW4OiAIjs6WxMmJppy\nGl6+8Bohc/s7sGK2q7NpbprHuPKVxbXvykSpH9Ag+0VkdM/U/Wi3ben2fetOtr4e\nYZwxEkEJrTyqNEzcepGuJwAJ7b55DmF5pVE7A/9F0QKBgQDLAHBX2vDfGdKnwa79\nlu70zrvhqje1mQhxUyXWlgTXzRZWIlPUQxsr5c8CrJ65k1rON9T987DlYQ9Miwll\nPlWvO19GTtIMnlH8WFhts61KMOS2RlBXIRVw761ZmqL1uv+XHBvINxpyNhwQsaWM\nNprkxcPCNNQWk9V0I0O+5qOnHwKBgQC25i7fQDlVujDKsWPpn6eACdR/fpxuEsmS\n8yLlhsziogd+LUzDrqVB3H17By68DiubP1eos1NETP9ojIFzWOa5o4mqjgJW3kuv\nsO0FymjlOhMLuHcn4PB2Oip4qJAbueo2S53Ow9S4HxLy8ofQ2EKjeTte0uD9p9hy\nbb+I/phIcQKBgE+diXH7bTKipwqiHKZaVrduiSM1JgozzarcaF+jkJyuU49OgUAj\nXXm29Jxg5RN1JkzwerlqpLsheOWVNgceDm7eQzyI1zqZsR/d6jiEGneZe2m9Y+74\nC7eyWHNnAXiMcYdrP74jVlzqudEWSw4VsGP+6Aq3u2JrcnDND9nEDPUTAoGAJ3yY\noABYoIZ7JDeaD4U1f3If24q1MRqDRGOTpCQvNbqvjXEwQosBCLAWsyoAz/7rMTBC\nt5xHnNZWyfaTuBh4b5m8DgNsw95oTr0O3xItBVg9Zmlj6Esq/wtdwgD6Y9IGm8RF\nhK9IzJuA1sy/v7oA4RQ6WiWDB6BmHYZONMBqljECgYACcI1e6bXkWNdK+QZMSN1i\nmI6BCCd8guNgZZZ22OnW5qd7x6WLVWcSGpGNqhwZzi1DenIZcRhZmCVc3aEfsqAf\nTg9jyWJZ9uoFvbduytcDYcWlhzAOdeX5ZG49jb1hdXUm9ek4Pd6RegILjGZCaZEJ\nr70vUSLgpqNr4sgsvLnnVg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-dh043@tofu-awards.iam.gserviceaccount.com",
+  "client_id": "112274706541349320778",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-dh043%40tofu-awards.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

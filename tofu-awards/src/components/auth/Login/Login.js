@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "firebase/auth"; 
 import { getFirestore, doc, setDoc } from "firebase/firestore"; 
 import imageG from "./../../../assets/google.svg"; 
+import { useNavigate } from "react-router-dom"; // Importa useNavigate
 import './Login.css';
 
 // Configuración de Firebase
@@ -28,6 +29,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true); 
   const [message, setMessage] = useState(""); 
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -40,39 +42,64 @@ const Login = () => {
       const user = userCredential.user;
       console.log("Usuario autenticado:", user);
       alert(`Login successful! User: ${user.email}`);
+      navigate('/home'); // Redirige a la página de votación
     } catch (error) {
-      console.error("Error al iniciar sesión:", error.message);
-      alert("Error al iniciar sesión");
+      console.error("Error al iniciar sesión:", error.code, error.message);
+      if (error.code === 'auth/user-not-found') {
+        alert("No hay un usuario registrado con ese correo electrónico.");
+      } else if (error.code === 'auth/wrong-password') {
+        alert("La contraseña es incorrecta.");
+      } else {
+        alert("Error al iniciar sesión: " + error.message);
+      }
     }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    
+  
     // Verifica que las contraseñas coincidan
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
-
+  
     try {
+      // Crear un nuevo usuario con email y contraseña
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
+  
       // Guardar información adicional en Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         createdAt: new Date(),
+        // Inicializa los votos para cada premio (ajusta según tus necesidades)
+        votosPremio1: {
+          nominados: {
+            "nominado1": 0,
+            "nominado2": 0,
+            "nominado3": 0,
+          },
+        },
+        votosPremio2: {
+          nominados: {
+            "nominado1": 0,
+            "nominado2": 0,
+            "nominado3": 0,
+          },
+        },
+        // Agrega más campos si es necesario
       });
-
+  
       console.log("Usuario registrado:", user);
-      alert(`Signup successful! User: ${user.email}`);
+      alert(`Registro exitoso! Usuario: ${user.email}`);
+      navigate('/home'); // Redirige a la página de votación
     } catch (error) {
       console.error("Error al registrarse:", error.message);
-      alert("Error al registrarse");
+      alert("Error al registrarse: " + error.message);
     }
   };
-
+  
   const handleResetPassword = async () => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -90,6 +117,7 @@ const Login = () => {
       const user = result.user;
       console.log("Usuario autenticado con Google:", user);
       alert(`Login successful with Google! User: ${user.email}`);
+      navigate('/home'); // Redirige a la página de votación
     } catch (error) {
       console.error("Error al iniciar sesión con Google:", error.message);
       alert("Error al iniciar sesión con Google");
