@@ -12,40 +12,135 @@ const db = admin.firestore();
 const dataToImport = {
   premios: [
     {
-      nombre: "Premio A",
-      descripcion: "Descripción del Premio A",
+      nombre: "Premio Innovación",
+      descripcion: "Premio al mejor avance tecnológico.",
       nominados: [
         {
-          nombre: "Nominado 1",
-          imageURL: "https://ejemplo.com/image1.jpg",
-          videoURL: "https://ejemplo.com/video1.mp4",
+          nombre: "Nominado Innovador 1",
+          imageURL: "https://ejemplo.com/innovacion1.jpg",
+          videoURL: "https://ejemplo.com/innovacion1.mp4",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Nominado 2",
-          imageURL: "https://ejemplo.com/image2.jpg",
-          videoURL: "https://ejemplo.com/video2.mp4",
+          nombre: "Nominado Innovador 2",
+          imageURL: "https://ejemplo.com/innovacion2.jpg",
+          videoURL: "https://ejemplo.com/innovacion2.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Nominado Innovador 3",
+          imageURL: "https://ejemplo.com/innovacion3.jpg",
+          videoURL: "https://ejemplo.com/innovacion3.mp4",
           votes: 0,
           votedUsers: {}
         }
       ]
     },
     {
-      nombre: "Premio B",
-      descripcion: "Descripción del Premio B",
+      nombre: "Premio Excelencia Artística",
+      descripcion: "Reconocimiento a los mejores en las artes.",
       nominados: [
         {
-          nombre: "Nominado 3",
-          imageURL: "https://ejemplo.com/image3.jpg",
-          videoURL: "https://ejemplo.com/video3.mp4",
+          nombre: "Artista 1",
+          imageURL: "https://ejemplo.com/artista1.jpg",
+          videoURL: "https://ejemplo.com/artista1.mp4",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Nominado 4",
-          imageURL: "https://ejemplo.com/image4.jpg",
-          videoURL: "https://ejemplo.com/video4.mp4",
+          nombre: "Artista 2",
+          imageURL: "https://ejemplo.com/artista2.jpg",
+          videoURL: "https://ejemplo.com/artista2.mp4",
+          votes: 0,
+          votedUsers: {}
+        }
+      ]
+    },
+    {
+      nombre: "Premio Deporte del Año",
+      descripcion: "Premio al mejor deportista del año.",
+      nominados: [
+        {
+          nombre: "Deportista 1",
+          imageURL: "https://ejemplo.com/deportista1.jpg",
+          videoURL: "https://ejemplo.com/deportista1.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Deportista 2",
+          imageURL: "https://ejemplo.com/deportista2.jpg",
+          videoURL: "https://ejemplo.com/deportista2.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Deportista 3",
+          imageURL: "https://ejemplo.com/deportista3.jpg",
+          videoURL: "https://ejemplo.com/deportista3.mp4",
+          votes: 0,
+          votedUsers: {}
+        }
+      ]
+    },
+    {
+      nombre: "Premio Liderazgo Social",
+      descripcion: "Premio a las iniciativas que promueven el cambio social.",
+      nominados: [
+        {
+          nombre: "Líder Social 1",
+          imageURL: "https://ejemplo.com/lider1.jpg",
+          videoURL: "https://ejemplo.com/lider1.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Líder Social 2",
+          imageURL: "https://ejemplo.com/lider2.jpg",
+          videoURL: "https://ejemplo.com/lider2.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Líder Social 3",
+          imageURL: "https://ejemplo.com/lider3.jpg",
+          videoURL: "https://ejemplo.com/lider3.mp4",
+          votes: 0,
+          votedUsers: {}
+        }
+      ]
+    },
+    {
+      nombre: "Premio Mejor Película",
+      descripcion: "Premio a la mejor película del año.",
+      nominados: [
+        {
+          nombre: "Película 1",
+          imageURL: "https://ejemplo.com/pelicula1.jpg",
+          videoURL: "https://ejemplo.com/pelicula1.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Película 2",
+          imageURL: "https://ejemplo.com/pelicula2.jpg",
+          videoURL: "https://ejemplo.com/pelicula2.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Película 3",
+          imageURL: "https://ejemplo.com/pelicula3.jpg",
+          videoURL: "https://ejemplo.com/pelicula3.mp4",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Película 4",
+          imageURL: "https://ejemplo.com/pelicula4.jpg",
+          videoURL: "https://ejemplo.com/pelicula4.mp4",
           votes: 0,
           votedUsers: {}
         }

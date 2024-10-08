@@ -73,22 +73,6 @@ const Login = () => {
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         createdAt: new Date(),
-        // Inicializa los votos para cada premio (ajusta según tus necesidades)
-        votosPremio1: {
-          nominados: {
-            "nominado1": 0,
-            "nominado2": 0,
-            "nominado3": 0,
-          },
-        },
-        votosPremio2: {
-          nominados: {
-            "nominado1": 0,
-            "nominado2": 0,
-            "nominado3": 0,
-          },
-        },
-        // Agrega más campos si es necesario
       });
   
       console.log("Usuario registrado:", user);

@@ -1,0 +1,44 @@
+.voting-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nominados-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Espacio entre los nominados */
+    justify-content: center; /* Centra los nominados horizontalmente */
+}
+
+.nominado {
+    text-align: center; /* Centra el texto y la imagen */
+    transition: opacity 0.6s ease; /* Agrega la transición de opacidad */
+    position: relative; /* Posición relativa para el efecto de opacidad */
+}
+
+.nominados-container:hover .nominado:not(:hover) {
+    opacity: 0.4; /* Cambia la opacidad de los nominados que no están siendo hovered */
+}
+
+
+.nominado img {
+    width: 200px; /* Ancho de la imagen */
+    height: auto; /* Mantiene la relación de aspecto */
+}
+
+.vote-button {
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px 10px;
+    margin-top: 5px;
+}
+
+.vote-button.selected {
+    background-color: green; /* Color cuando está seleccionado */
+    color: white; /* Texto blanco en el botón seleccionado */
+}
+
+.navigation-buttons {
+    margin-top: 20px;
+}
