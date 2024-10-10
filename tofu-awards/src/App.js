@@ -8,8 +8,19 @@ import VotingScreen from './components/home/Voting'; // Actualizado a VotingScre
 
 const App = () => {
 
-  const premioIds = ["1lixzT838IToU7IK0BIS", "B7FXUIV5Hyncc1pb5ltJ","ZyQ8ZM5Pa1YzpeonU1uQ","n9cZMGy6TgRpdMF3eBNw","uKv2D4zxT1LaW26svyw0"];
-
+  const premioIds = [
+    "1MNYMNAOyFXJyfuqdp5z",
+    "11ixzT838IToU7IK0BIS",
+    "2wqjAkQ6AgWEKHZ2ev99",
+    "B7FXUIV5Hyncc1pb5ltJ",
+    "JLsAMmvyJFaDTgQzfaFQa",
+    "RWM2j5hryvogzP6oTWYk",
+    "ZyQ8ZM5Pa1YzpeonU1uQ",
+    "n9cZMGy6TgRpdMF3eBNw",
+    "nP2kfqHb6LpwrqzL6vW",
+    "uKv2D4zxT1LaW26svyw"
+  ];
+  
 
   return (
     <Router>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { initializeApp } from "firebase/app"; 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "firebase/auth"; 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, sendEmailVerification } from "firebase/auth"; 
 import { getFirestore, doc, setDoc } from "firebase/firestore"; 
 import imageG from "./../../../assets/google.svg"; 
 import { useNavigate } from "react-router-dom"; // Importa useNavigate
@@ -40,6 +40,13 @@ const Login = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      
+      // Verificamos si el usuario ha verificado su email
+      if (!user.emailVerified) {
+        alert("Por favor, verifica tu correo electrónico antes de iniciar sesión.");
+        return;
+      }
+
       console.log("Usuario autenticado:", user);
       alert(`Login successful! User: ${user.email}`);
       navigate('/home'); // Redirige a la página de votación
@@ -69,6 +76,10 @@ const Login = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
   
+      // Enviar email de verificación
+      await sendEmailVerification(user);
+      alert(`Registro exitoso! Verifica tu correo electrónico para continuar.`);
+  
       // Guardar información adicional en Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
@@ -76,8 +87,7 @@ const Login = () => {
       });
   
       console.log("Usuario registrado:", user);
-      alert(`Registro exitoso! Usuario: ${user.email}`);
-      navigate('/home'); // Redirige a la página de votación
+      navigate('/login'); // Redirige a la página de inicio de sesión
     } catch (error) {
       console.error("Error al registrarse:", error.message);
       alert("Error al registrarse: " + error.message);

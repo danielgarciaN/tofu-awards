@@ -10,6 +10,8 @@ const Voting = ({ premioIds }) => {
   const [loading, setLoading] = useState(true); // Estado para manejar la carga
   const [currentIndex, setCurrentIndex] = useState(0); // Índice del premio actual
   const user = auth.currentUser; // Obtiene el usuario autenticado
+  const [showVideoModal, setShowVideoModal] = useState(false); // Estado para mostrar/ocultar el modal
+  const [selectedVideoURL, setSelectedVideoURL] = useState(""); // Estado para almacenar la URL del video seleccionado
 
   useEffect(() => {
     const fetchPremioAndNominados = async () => {
@@ -50,9 +52,16 @@ const Voting = ({ premioIds }) => {
     }));
   };
 
-  // Función para calcular el total de votos sumando los votos de todos los usuarios en `votedUsers`
-  const calculateTotalVotes = (votedUsers) => {
-    return Object.values(votedUsers).reduce((total, user) => total + user.vote, 0);
+  // Función para calcular la suma total de puntos
+  const calculateTotalPoints = (votes) => {
+    const pointsMap = {
+      1: 5,
+      2: 3,
+      3: 1,
+      4: 0
+    };
+
+    return Object.values(votes).reduce((total, vote) => total + (pointsMap[vote] || 0), 0);
   };
 
   // Función para enviar los votos
@@ -71,6 +80,7 @@ const Voting = ({ premioIds }) => {
 
       for (const nominadoId in selectedVotes) {
         const vote = selectedVotes[nominadoId];
+        const points = vote === "-" ? 0 : (5 - (vote - 1) * 2); // Calcular puntos (5, 3, 1, o 0)
         const nominadoRef = doc(db, "premios", premioIds[currentIndex], "nominados", nominadoId);
 
         // Obtener los datos actuales del nominado, incluyendo los votos anteriores
@@ -83,23 +93,23 @@ const Voting = ({ premioIds }) => {
           [user.uid]: {
             email: user.email,
             timestamp: new Date().toISOString(),
-            vote
+            vote: points // Guardamos el puntaje calculado
           }
         };
 
-        // Recalculamos el total de votos basado en `votedUsers`
-        const totalVotes = calculateTotalVotes(updatedVotedUsers);
+        // Recalculamos el total de puntos basado en `votedUsers`
+        const totalPoints = calculateTotalPoints(updatedVotedUsers);
 
         // Actualizamos el documento del nominado con los nuevos votos y el total actualizado
         await updateDoc(nominadoRef, {
           votedUsers: updatedVotedUsers,
-          votes: totalVotes
+          votes: totalPoints // Suma total de votos
         });
 
         // También actualizamos el documento del usuario para registrar su voto
         await setDoc(userDocRef, {
           [premio.nombre]: {
-            [nominadoId]: vote
+            [nominadoId]: points // Guardamos el puntaje
           }
         }, { merge: true });
       }
@@ -126,10 +136,26 @@ const Voting = ({ premioIds }) => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + premioIds.length) % premioIds.length); // Va al final si se vuelve al inicio
   };
 
+  // Función para abrir el modal con el video seleccionado
+  const handleShowVideo = (videoURL) => {
+    setSelectedVideoURL(videoURL); // Establece la URL del video seleccionado
+    setShowVideoModal(true); // Muestra el modal
+  };
+
+  // Función para cerrar el modal
+  const handleCloseVideo = () => {
+    setShowVideoModal(false); // Oculta el modal
+    setSelectedVideoURL(""); // Limpia la URL del video
+  };
+
   return (
     <div className="voting-container">
-      <h1>{premio.nombre}</h1>
-      <p>{premio.descripcion}</p>
+      <video autoPlay loop muted className="video-background">
+        <source src={require('./../../assets/videos/overlay4.mp4')} type="video/mp4" />
+        Tu navegador no soporta el elemento de video.
+      </video>
+      <h1 className="VotingTitle">{premio.nombre}</h1>
+      <p className="subtitle">{premio.descripcion}</p>
       <div className="nominados-container">
         {nominados.length > 0 ? (
           nominados.map((nominado) => (
@@ -138,21 +164,22 @@ const Voting = ({ premioIds }) => {
               <img src={nominado.imageURL} alt={nominado.nombre} />
               {nominado.videoURL && (
                 <div>
-                  <a href={nominado.videoURL} target="_blank" rel="noopener noreferrer">
+                  <button className="videoButton" onClick={() => handleShowVideo(nominado.videoURL)}>
                     Ver Video
-                  </a>
+                  </button>
                 </div>
               )}
               <div>
-                {[1, 2, 3, 4].map((vote) => (
-                  <button
-                    key={vote}
-                    onClick={() => handleSelectVote(nominado.id, vote)}
-                    className={`vote-button ${selectedVotes[nominado.id] === vote ? 'selected' : ''}`}
-                  >
-                    {vote}
-                  </button>
-                ))}
+                <select 
+                  onChange={(e) => handleSelectVote(nominado.id, e.target.value)} 
+                  value={selectedVotes[nominado.id] || "-"}
+                >
+                  <option value="-">-</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
               </div>
             </div>
           ))
@@ -161,12 +188,25 @@ const Voting = ({ premioIds }) => {
         )}
       </div>
       <div className="navigation-buttons">
-        <button onClick={handlePrev}>Atrás</button>
-        <button onClick={handleNext}>Siguiente</button>
+        <button className="button-next-back" onClick={handlePrev}>Atrás</button>
+        <button className="button-next-back" onClick={handleNext}>Siguiente</button>
       </div>
-      <button onClick={handleSubmitVotes} style={{ marginTop: "20px" }}>
+      <button className="button-voting" onClick={handleSubmitVotes} style={{ marginTop: "20px" }}>
         Enviar Votos
       </button>
+
+      {/* Modal para mostrar el video */}
+      {showVideoModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button className="modal-close-button" onClick={handleCloseVideo}>X</button>
+            <video controls autoPlay className="modal-video">
+              <source src={selectedVideoURL} type="video/mp4" />
+              Tu navegador no soporta el video.
+            </video>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Usa el 100% de la altura de la ventana */
+    overflow: hidden;
 }
 
 .nominados-container {
@@ -13,18 +17,25 @@
 
 .nominado {
     text-align: center; /* Centra el texto y la imagen */
-    transition: opacity 0.6s ease; /* Agrega la transición de opacidad */
     position: relative; /* Posición relativa para el efecto de opacidad */
+    font-family: "Playfair Display", serif;
+    font-weight: bold;
+    color: #ffda95; /* Color dorado */
+    text-shadow: 
+        0 0 3px #ffcc00,   /* Sombra menos difusa */
+        0 0 5px #ffcc00;   /* Solo dos sombras para menos intensidad */
 }
 
-.nominados-container:hover .nominado:not(:hover) {
-    opacity: 0.4; /* Cambia la opacidad de los nominados que no están siendo hovered */
-}
 
 
 .nominado img {
-    width: 200px; /* Ancho de la imagen */
-    height: auto; /* Mantiene la relación de aspecto */
+    width: 300px; /* Ancho de la imagen */
+    height: 200px; /* Mantiene la relación de aspecto */
+    border-radius: 10%;
+}
+
+.nominado img.selected {
+    filter: grayscale(100%); /* Aplicar un filtro gris a la imagen seleccionada */
 }
 
 .vote-button {
@@ -39,6 +50,155 @@
     color: white; /* Texto blanco en el botón seleccionado */
 }
 
-.navigation-buttons {
-    margin-top: 20px;
+.button-voting {
+    font-family: "Playfair Display", serif;
+    background: linear-gradient(90deg, #FFDD44, #FF9933); /* Degradado de amarillo a naranja */
+    border: none; /* Sin borde */
+    color: #333; /* Color del texto (gris oscuro) */
+    padding: 10px 25px; /* Espaciado interno del botón */
+    text-align: center; /* Centra el texto dentro del botón */
+    text-decoration: none; /* Sin subrayado */
+    display: inline-block; /* Asegura que se comporte como un botón en línea */
+    font-size: 16px; /* Tamaño de la fuente */
+    font-weight: bold; /* Texto en negrita */
+    border-radius: 50px; /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar efecto 3D */
+    transition: transform 0.2s ease-in-out; /* Transición suave en hover */
+    cursor: pointer; /* Cambia el cursor a pointer cuando se pasa por encima */
 }
+
+.button-voting:hover {
+    background-color: rgb(226, 251, 2);
+    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+}
+
+.videoButton {
+  font-family: "Playfair Display", serif;
+  background-color:rgba(0, 0, 0, 0.7); /* Degradado de amarillo a naranja */
+  border: none; /* Sin borde */
+  color: #FFDD44; /* Color del texto (gris oscuro) */
+  padding: 10px 25px; /* Espaciado interno del botón */
+  text-align: center; /* Centra el texto dentro del botón */
+  text-decoration: none; /* Sin subrayado */
+  display: inline-block; /* Asegura que se comporte como un botón en línea */
+  font-size: 16px; /* Tamaño de la fuente */
+  font-weight: bold; /* Texto en negrita */
+  border-radius: 50px; /* Bordes redondeados */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar efecto 3D */
+  transition: transform 0.2s ease-in-out; /* Transición suave en hover */
+  cursor: pointer; /* Cambia el cursor a pointer cuando se pasa por encima */
+}
+
+.videoButton:hover {
+    background-color: rgb(127, 124, 187);
+    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+}
+
+.button-next-back {
+  font-family: "Playfair Display", serif;
+  background: linear-gradient(90deg, #FFDD44, #FF9933); /* Degradado de amarillo a naranja */
+  border: none; /* Sin borde */
+  color: #333; /* Color del texto (gris oscuro) */
+  padding: 10px 25px; /* Espaciado interno del botón */
+  text-align: center; /* Centra el texto dentro del botón */
+  text-decoration: none; /* Sin subrayado */
+  display: inline-block; /* Asegura que se comporte como un botón en línea */
+  font-size: 16px; /* Tamaño de la fuente */
+  font-weight: bold; /* Texto en negrita */
+  border-radius: 50px; /* Bordes redondeados */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar efecto 3D */
+  transition: transform 0.2s ease-in-out; /* Transición suave en hover */
+  cursor: pointer; /* Cambia el cursor a pointer cuando se pasa por encima */
+}
+
+.button-next-back:hover {
+    background-color: rgb(226, 251, 2);
+    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+}
+
+.navigation-buttons {
+    position: absolute;
+    bottom: 40px; /* Posiciona ambos botones en la parte inferior */
+    width: 90%;
+    display: flex;
+    justify-content: space-between; /* Coloca "Back" a la izquierda y "Next" a la derecha */
+    padding: 0 20px; /* Un poco de margen lateral para separarlos del borde */
+}
+
+.video-background {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -1; /* Asegura que el video esté detrás del contenido */
+    transform: translate(-50%, -50%);
+}
+
+.VotingTitle {
+    font-family: "Playfair Display", serif;
+    font-size: 4rem; /* Ajusta el tamaño de la fuente */
+    font-weight: bold;
+    color: #ffda95; /* Color dorado */
+    text-shadow: 
+    0 0 3px #ffcc00,   /* Sombra menos difusa */
+    0 0 5px #ffcc00;   /* Solo dos sombras para menos intensidad */
+    margin-bottom: 20px; /* Espacio entre el título y el formulario */
+}
+
+.subtitle {
+    font-family: "Playfair Display", serif;
+    font-weight: bold;
+    color: #ffda95; /* Color dorado */
+    text-shadow: 
+    0 0 3px #ffcc00,   /* Sombra menos difusa */
+    0 0 5px #ffcc00;   /* Solo dos sombras para menos intensidad */
+}
+
+/* Fondo semi-transparente que cubre toda la pantalla */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* Fondo oscuro y semi-transparente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Asegura que esté sobre otros elementos */
+  }
+  
+  /* Contenido del modal */
+  .modal-content {
+    background: #fff; /* Fondo blanco para el modal */
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto; /* Si el contenido es demasiado grande, se desplaza */
+  }
+  
+  /* Botón para cerrar el modal */
+  .modal-close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  
+  /* Estilo del video dentro del modal */
+  .modal-video {
+    width: 100%;
+    height: auto;
+  }
+  
