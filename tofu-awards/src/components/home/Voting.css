@@ -13,6 +13,13 @@
     flex-wrap: wrap;
     gap: 20px; /* Espacio entre los nominados */
     justify-content: center; /* Centra los nominados horizontalmente */
+    opacity: 1;
+    transition: opacity 0.5s ease-in;
+}
+
+.nominados-container.transitioning {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
 }
 
 .nominado {
@@ -68,7 +75,7 @@
 }
 
 .button-voting:hover {
-    background-color: rgb(226, 251, 2);
+    background: linear-gradient(90deg, #FF9933, #c48900); 
     transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
 }
 
@@ -90,8 +97,9 @@
 }
 
 .videoButton:hover {
-    background-color: rgb(127, 124, 187);
+    background-color: rgb(251, 255, 0);
     transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+    color: #000
 }
 
 .button-next-back {
@@ -112,7 +120,7 @@
 }
 
 .button-next-back:hover {
-    background-color: rgb(226, 251, 2);
+    background: linear-gradient(90deg, #FF9933, #c48900); 
     transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
 }
 
@@ -201,4 +209,90 @@
     width: 100%;
     height: auto;
   }
+
+
+/* Estilo general del select */
+.nominado select {
+    width: auto;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 2px solid #ffcc00; /* Color de borde */
+    background-color: #f0f8f5; /* Fondo claro */
+    color: #333; /* Color del texto */
+    font-size: 16px;
+    font-weight: bold;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    outline: none; /* Quita el borde de enfoque predeterminado */
+    appearance: none; /* Quita la flecha por defecto en algunos navegadores */
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  }
   
+  /* Flecha personalizada en el select */
+  .nominado select::after {
+    content: '▼';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffcc00;
+    border: 2px;
+  }
+  
+  /* Cambios en el select al enfocarse o hacer hover */
+  .nominado select:hover {
+    border-color: #ffcc00; /* Color de borde al pasar el cursor */
+    background-color: #e9f7ef; /* Fondo al pasar el cursor */
+  }
+  
+  /* Estilo de las opciones del select */
+  .nominado select option {
+    background-color: #ffffff; /* Fondo de las opciones */
+    color: #333;
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  /* Color de fondo de la opción seleccionada */
+  .nominado select option:checked {
+    background-color: #ffcc00;
+    color: #ffffff;
+  }
+  
+  .nominado-options {
+    display: flex;
+    gap: 10px; /* Espacio entre el botón y el selector */
+    align-items: center; /* Alinea verticalmente en el centro */
+    justify-content: center;
+    margin-top: 10px; /* Espacio superior para separación del contenido anterior */
+  }
+
+/* Barra de progreso de premios */
+.progress-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro semi-transparente */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2000; /* Asegura que la barra esté siempre sobre otros elementos */
+}
+
+/* Puntos de progreso */
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ccc; /* Color gris para puntos inactivos */
+  margin: 0 5px; /* Espaciado horizontal entre puntos */
+  transition: background-color 0.3s ease; /* Transición suave para cambio de color */
+}
+
+/* Punto activo (indica el premio actual) */
+.progress-dot.active {
+  background-color: #ffcc00; /* Color dorado para el punto activo */
+}

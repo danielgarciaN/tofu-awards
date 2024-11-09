@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "./../../firebase.js";
 import { doc, getDoc, getDocs, collection, updateDoc, setDoc } from "firebase/firestore";
-import './Voting.css'; // Importa el archivo CSS
+import './Voting.css';
 
 const Voting = ({ premioIds }) => {
   const [premio, setPremio] = useState(null);
-  const [nominados, setNominados] = useState([]); // Estado para los nominados
-  const [selectedVotes, setSelectedVotes] = useState({}); // Guardar los votos seleccionados
-  const [loading, setLoading] = useState(true); // Estado para manejar la carga
-  const [currentIndex, setCurrentIndex] = useState(0); // Índice del premio actual
-  const user = auth.currentUser; // Obtiene el usuario autenticado
-  const [showVideoModal, setShowVideoModal] = useState(false); // Estado para mostrar/ocultar el modal
-  const [selectedVideoURL, setSelectedVideoURL] = useState(""); // Estado para almacenar la URL del video seleccionado
+  const [nominados, setNominados] = useState([]);
+  const [selectedVotes, setSelectedVotes] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
+  const user = auth.currentUser;
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [selectedVideoURL, setSelectedVideoURL] = useState("");
 
   useEffect(() => {
     const fetchPremioAndNominados = async () => {
@@ -21,17 +22,16 @@ const Voting = ({ premioIds }) => {
         if (premioDoc.exists()) {
           const premioData = premioDoc.data();
           setPremio(premioData);
-
-          // Obtener nominados
-          const nominadosSnapshot = await getDocs(collection(doc(db, "premios", premioIds[currentIndex]), "nominados"));
-          const nominadosList = nominadosSnapshot.docs.map(doc => ({
+  
+          const nominadosSnapshot = await getDocs(
+            collection(doc(db, "premios", premioIds[currentIndex]), "nominados")
+          );
+          const nominadosList = nominadosSnapshot.docs.map((doc) => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }));
           setNominados(nominadosList);
-
-          // Resetear los votos cuando se cambia de premio
-          setSelectedVotes({}); // Limpiar los votos anteriores
+          setSelectedVotes({});
         } else {
           console.log("No hay documento de premio encontrado");
         }
@@ -41,10 +41,11 @@ const Voting = ({ premioIds }) => {
         setLoading(false);
       }
     };
+  
     fetchPremioAndNominados();
-  }, [currentIndex, premioIds]);
+  }, [currentIndex, premioIds]); // Solo actualiza al cambiar currentIndex o premioIds
+  
 
-  // Función para seleccionar un voto
   const handleSelectVote = (nominadoId, vote) => {
     setSelectedVotes((prevVotes) => ({
       ...prevVotes,
@@ -52,27 +53,20 @@ const Voting = ({ premioIds }) => {
     }));
   };
 
-  // Función para calcular la suma total de puntos
-  const calculateTotalPoints = (votes) => {
-    const pointsMap = {
-      1: 5,
-      2: 3,
-      3: 1,
-      4: 0
-    };
-
-    return Object.values(votes).reduce((total, vote) => total + (pointsMap[vote] || 0), 0);
+  const calculatePoints = (position) => {
+    if (position === "1") return 5;
+    if (position === "2") return 3;
+    if (position === "3") return 1;
+    return 0;
   };
 
-  // Función para enviar los votos
   const handleSubmitVotes = async () => {
     const usedVotes = Object.values(selectedVotes);
     const uniqueVotes = new Set(usedVotes);
 
-    // Validar que se haya votado en el premio actual y que no se repitan puntuaciones
     if (usedVotes.length !== nominados.length || usedVotes.length !== uniqueVotes.size) {
       alert("Debes asignar una puntuación única a cada nominado antes de enviar.");
-      return; // Detener el envío si hay puntuaciones duplicadas o si faltan votos
+      return;
     }
 
     try {
@@ -80,42 +74,37 @@ const Voting = ({ premioIds }) => {
 
       for (const nominadoId in selectedVotes) {
         const vote = selectedVotes[nominadoId];
-        const points = vote === "-" ? 0 : (5 - (vote - 1) * 2); // Calcular puntos (5, 3, 1, o 0)
+        const points = calculatePoints(vote);
         const nominadoRef = doc(db, "premios", premioIds[currentIndex], "nominados", nominadoId);
 
-        // Obtener los datos actuales del nominado, incluyendo los votos anteriores
         const nominadoDoc = await getDoc(nominadoRef);
         const nominadoData = nominadoDoc.data();
 
-        // Actualizamos el campo `votedUsers` con el nuevo voto del usuario
         const updatedVotedUsers = {
           ...nominadoData.votedUsers,
           [user.uid]: {
             email: user.email,
             timestamp: new Date().toISOString(),
-            vote: points // Guardamos el puntaje calculado
+            vote: points
           }
         };
 
-        // Recalculamos el total de puntos basado en `votedUsers`
-        const totalPoints = calculateTotalPoints(updatedVotedUsers);
+        const totalPoints = Object.values(updatedVotedUsers).reduce((sum, userVote) => sum + userVote.vote, 0);
 
-        // Actualizamos el documento del nominado con los nuevos votos y el total actualizado
         await updateDoc(nominadoRef, {
           votedUsers: updatedVotedUsers,
-          votes: totalPoints // Suma total de votos
+          votes: totalPoints
         });
 
-        // También actualizamos el documento del usuario para registrar su voto
         await setDoc(userDocRef, {
           [premio.nombre]: {
-            [nominadoId]: points // Guardamos el puntaje
+            [nominadoId]: points
           }
         }, { merge: true });
       }
 
       alert("¡Votos enviados con éxito!");
-      setSelectedVotes({}); // Resetear los votos seleccionados después de enviarlos
+      setSelectedVotes({});
 
     } catch (error) {
       console.error("Error al registrar los votos:", error);
@@ -123,62 +112,71 @@ const Voting = ({ premioIds }) => {
     }
   };
 
-  // Manejo de la carga
   if (loading) return <div>Cargando...</div>;
   if (!premio) return <div>No se encontró información del premio.</div>;
 
-  // Navegación
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % premioIds.length); // Vuelve al inicio si se excede
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % premioIds.length);
+      setTransitioning(false);
+    }, 500); // Ajusta este tiempo al tiempo de transición en CSS
   };
-
+  
   const handlePrev = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + premioIds.length) % premioIds.length); // Va al final si se vuelve al inicio
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex - 1 + premioIds.length) % premioIds.length);
+      setTransitioning(false);
+    }, 500);
   };
 
-  // Función para abrir el modal con el video seleccionado
   const handleShowVideo = (videoURL) => {
-    setSelectedVideoURL(videoURL); // Establece la URL del video seleccionado
-    setShowVideoModal(true); // Muestra el modal
+    setSelectedVideoURL(videoURL);
+    setShowVideoModal(true);
   };
 
-  // Función para cerrar el modal
   const handleCloseVideo = () => {
-    setShowVideoModal(false); // Oculta el modal
-    setSelectedVideoURL(""); // Limpia la URL del video
+    setShowVideoModal(false);
+    setSelectedVideoURL("");
   };
 
   return (
     <div className="voting-container">
       <video autoPlay loop muted className="video-background">
-        <source src={require('./../../assets/videos/overlay4.mp4')} type="video/mp4" />
+        <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
         Tu navegador no soporta el elemento de video.
       </video>
+      <div className="progress-bar">
+        {premioIds.map((_, index) => (
+          <div
+            key={index}
+            className={`progress-dot ${currentIndex === index ? "active" : ""}`}
+          ></div>
+        ))}
+      </div>
       <h1 className="VotingTitle">{premio.nombre}</h1>
       <p className="subtitle">{premio.descripcion}</p>
-      <div className="nominados-container">
+      <div className={`nominados-container ${transitioning ? "transitioning" : ""}`}>        
         {nominados.length > 0 ? (
           nominados.map((nominado) => (
             <div key={nominado.id} className="nominado">
               <h2>{nominado.nombre}</h2>
               <img src={nominado.imageURL} alt={nominado.nombre} />
-              {nominado.videoURL && (
-                <div>
+              <div className="nominado-options">
+                {nominado.videoURL && (
                   <button className="videoButton" onClick={() => handleShowVideo(nominado.videoURL)}>
                     Ver Video
                   </button>
-                </div>
-              )}
-              <div>
-                <select 
-                  onChange={(e) => handleSelectVote(nominado.id, e.target.value)} 
+                )}
+                <select
+                  onChange={(e) => handleSelectVote(nominado.id, e.target.value)}
                   value={selectedVotes[nominado.id] || "-"}
                 >
                   <option value="-">-</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
+                  {Array.from({ length: nominados.length }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -195,7 +193,6 @@ const Voting = ({ premioIds }) => {
         Enviar Votos
       </button>
 
-      {/* Modal para mostrar el video */}
       {showVideoModal && (
         <div className="modal-overlay">
           <div className="modal-content">

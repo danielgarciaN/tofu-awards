@@ -27,7 +27,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<PasswordPrompt />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<VotingScreen premioIds={premioIds} />} /> {/* Nueva ruta para la pantalla de votación */}
+        <Route path="/home" element={<VotingScreen premioIds={premioIds} />} />
       </Routes>
     </Router>
   );

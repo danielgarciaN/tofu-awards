@@ -14,13 +14,15 @@
 
 /* Contenedor del formulario */
 .login-container {
+  font-family: "Playfair Display", serif;
   width: 350px;
   padding: 2rem;
   background-color: #ffda95; /* Fondo blanco con opacidad */
   border-radius: 8px;
   opacity: 95%;
   box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2); /* Sombra más suave */
-  backdrop-filter: blur(10px); /* Efecto de desenfoque en el fondo */
+  backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo */
+  border: 3px solid #b8860b; /* Borde dorado oscuro */
 }
 
 .video-background {
@@ -46,6 +48,7 @@
 .input-field {
   position: relative;
   margin-bottom: 1rem;
+  
 }
 
 .input-field input {
@@ -75,6 +78,7 @@
   font-size: 0.9rem;
   color: #bd0b0b;
   text-decoration: none;
+  
 }
 
 .forgot-pass:hover {
@@ -95,6 +99,7 @@
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
+  font-family: "Playfair Display", serif;
   transition: background-color 0.3s ease;
 }
 
@@ -146,6 +151,7 @@
   border-radius: 4px;
   cursor: pointer;
   border: 1px solid #ccc;
+  font-family: "Playfair Display", serif;
   transition: background-color 0.3s ease;
 }
 
