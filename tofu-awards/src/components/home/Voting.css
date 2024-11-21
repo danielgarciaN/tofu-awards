@@ -4,45 +4,45 @@
     align-items: center;
     position: relative;
     width: 100%;
-    height: 100vh; /* Usa el 100% de la altura de la ventana */
+    height: 100vh;
     overflow: hidden;
 }
 
 .nominados-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px; /* Espacio entre los nominados */
-    justify-content: center; /* Centra los nominados horizontalmente */
+    gap: 20px;
+    justify-content: center;
     opacity: 1;
-    transition: opacity 0.5s ease-in;
+    transition: opacity 0.5s ease-in, transform 0.5s ease-in;
+    transform: translateX(0);
 }
 
 .nominados-container.transitioning {
-  opacity: 0;
-  transition: opacity 0.5s ease-out;
+    opacity: 0;
+    transform: translateX(-20%);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 .nominado {
-    text-align: center; /* Centra el texto y la imagen */
-    position: relative; /* Posición relativa para el efecto de opacidad */
+    text-align: center;
+    position: relative;
     font-family: "Playfair Display", serif;
     font-weight: bold;
-    color: #ffda95; /* Color dorado */
-    text-shadow: 
-        0 0 3px #ffcc00,   /* Sombra menos difusa */
-        0 0 5px #ffcc00;   /* Solo dos sombras para menos intensidad */
+    color: #ffda95;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
 }
 
-
-
 .nominado img {
-    width: 300px; /* Ancho de la imagen */
-    height: 200px; /* Mantiene la relación de aspecto */
+    width: 300px;
+    height: 200px;
     border-radius: 10%;
 }
 
-.nominado img.selected {
-    filter: grayscale(100%); /* Aplicar un filtro gris a la imagen seleccionada */
+.nominado img:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .vote-button {
@@ -53,84 +53,89 @@
 }
 
 .vote-button.selected {
-    background-color: green; /* Color cuando está seleccionado */
-    color: white; /* Texto blanco en el botón seleccionado */
+    background-color: green;
+    color: white;
 }
 
 .button-voting {
     font-family: "Playfair Display", serif;
-    background: linear-gradient(90deg, #FFDD44, #FF9933); /* Degradado de amarillo a naranja */
-    border: none; /* Sin borde */
-    color: #333; /* Color del texto (gris oscuro) */
-    padding: 10px 25px; /* Espaciado interno del botón */
-    text-align: center; /* Centra el texto dentro del botón */
-    text-decoration: none; /* Sin subrayado */
-    display: inline-block; /* Asegura que se comporte como un botón en línea */
-    font-size: 16px; /* Tamaño de la fuente */
-    font-weight: bold; /* Texto en negrita */
-    border-radius: 50px; /* Bordes redondeados */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar efecto 3D */
-    transition: transform 0.2s ease-in-out; /* Transición suave en hover */
-    cursor: pointer; /* Cambia el cursor a pointer cuando se pasa por encima */
+    background: linear-gradient(90deg, #FFDD44, #FF9933);
+    border: none;
+    color: #333;
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .button-voting:hover {
-    background: linear-gradient(90deg, #FF9933, #c48900); 
-    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+    background: linear-gradient(90deg, #FF9933, #c48900);
+    transform: scale(1.05);
 }
 
 .videoButton {
-  font-family: "Playfair Display", serif;
-  background-color:rgba(0, 0, 0, 0.7); /* Degradado de amarillo a naranja */
-  border: none; /* Sin borde */
-  color: #FFDD44; /* Color del texto (gris oscuro) */
-  padding: 10px 25px; /* Espaciado interno del botón */
-  text-align: center; /* Centra el texto dentro del botón */
-  text-decoration: none; /* Sin subrayado */
-  display: inline-block; /* Asegura que se comporte como un botón en línea */
-  font-size: 16px; /* Tamaño de la fuente */
-  font-weight: bold; /* Texto en negrita */
-  border-radius: 50px; /* Bordes redondeados */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar efecto 3D */
-  transition: transform 0.2s ease-in-out; /* Transición suave en hover */
-  cursor: pointer; /* Cambia el cursor a pointer cuando se pasa por encima */
+    font-family: "Playfair Display", serif;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: #FFDD44;
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .videoButton:hover {
     background-color: rgb(251, 255, 0);
-    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
-    color: #000
+    transform: scale(1.05);
+    color: #000;
 }
 
 .button-next-back {
-  font-family: "Playfair Display", serif;
-  background: linear-gradient(90deg, #FFDD44, #FF9933); /* Degradado de amarillo a naranja */
-  border: none; /* Sin borde */
-  color: #333; /* Color del texto (gris oscuro) */
-  padding: 10px 25px; /* Espaciado interno del botón */
-  text-align: center; /* Centra el texto dentro del botón */
-  text-decoration: none; /* Sin subrayado */
-  display: inline-block; /* Asegura que se comporte como un botón en línea */
-  font-size: 16px; /* Tamaño de la fuente */
-  font-weight: bold; /* Texto en negrita */
-  border-radius: 50px; /* Bordes redondeados */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar efecto 3D */
-  transition: transform 0.2s ease-in-out; /* Transición suave en hover */
-  cursor: pointer; /* Cambia el cursor a pointer cuando se pasa por encima */
+    font-family: "Playfair Display", serif;
+    background: linear-gradient(90deg, #FFDD44, #FF9933);
+    border: none;
+    color: #333;
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .button-next-back:hover {
-    background: linear-gradient(90deg, #FF9933, #c48900); 
-    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+    background: linear-gradient(90deg, #FF9933, #c48900);
+    transform: scale(1.05);
+}
+
+.button-next-back:active {
+    background: linear-gradient(90deg, #c48900, #FF9933);
+    transform: scale(0.95);
 }
 
 .navigation-buttons {
     position: absolute;
-    bottom: 40px; /* Posiciona ambos botones en la parte inferior */
+    bottom: 40px;
     width: 90%;
     display: flex;
-    justify-content: space-between; /* Coloca "Back" a la izquierda y "Next" a la derecha */
-    padding: 0 20px; /* Un poco de margen lateral para separarlos del borde */
+    justify-content: space-between;
+    padding: 0 20px;
 }
 
 .video-background {
@@ -141,158 +146,138 @@
     min-height: 100%;
     width: auto;
     height: auto;
-    z-index: -1; /* Asegura que el video esté detrás del contenido */
+    z-index: -1;
     transform: translate(-50%, -50%);
+    filter: brightness(0.4);
 }
 
 .VotingTitle {
     font-family: "Playfair Display", serif;
-    font-size: 4rem; /* Ajusta el tamaño de la fuente */
+    font-size: 4rem;
     font-weight: bold;
-    color: #ffda95; /* Color dorado */
-    text-shadow: 
-    0 0 3px #ffcc00,   /* Sombra menos difusa */
-    0 0 5px #ffcc00;   /* Solo dos sombras para menos intensidad */
-    margin-bottom: 20px; /* Espacio entre el título y el formulario */
+    color: #ffda95;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
+    margin-bottom: 20px;
 }
 
 .subtitle {
     font-family: "Playfair Display", serif;
     font-weight: bold;
-    color: #ffda95; /* Color dorado */
-    text-shadow: 
-    0 0 3px #ffcc00,   /* Sombra menos difusa */
-    0 0 5px #ffcc00;   /* Solo dos sombras para menos intensidad */
+    color: #ffda95;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
 }
 
-/* Fondo semi-transparente que cubre toda la pantalla */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.7); /* Fondo oscuro y semi-transparente */
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000; /* Asegura que esté sobre otros elementos */
-  }
-  
-  /* Contenido del modal */
-  .modal-content {
-    background: #fff; /* Fondo blanco para el modal */
+    z-index: 1000;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: #fff;
     padding: 20px;
     border-radius: 10px;
     position: relative;
     max-width: 90%;
     max-height: 90%;
-    overflow: auto; /* Si el contenido es demasiado grande, se desplaza */
-  }
-  
-  /* Botón para cerrar el modal */
-  .modal-close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: red;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 50%;
-  }
-  
-  /* Estilo del video dentro del modal */
-  .modal-video {
+    overflow: auto;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff0000; /* Rojo sólido para mejor visibilidad */
+  color: white;
+  border: none;
+  width: 25px; /* Tamaño reducido para ser menos intrusivo */
+  height: 25px; /* Tamaño reducido para ser menos intrusivo */
+  border-radius: 50%;
+  font-size: 16px; /* Tamaño del texto de la 'X' */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 1500; /* Asegurarse de que esté por encima del resto del contenido */
+}
+
+.modal-close-button:hover {
+  background: #cc0000; /* Un rojo más oscuro para el efecto hover */
+  transform: scale(1.1); /* Aumentar ligeramente el tamaño al pasar el ratón */
+}
+
+
+.modal-video {
     width: 100%;
     height: auto;
-  }
+}
 
-
-/* Estilo general del select */
 .nominado select {
     width: auto;
     padding: 5px 10px;
     border-radius: 8px;
-    border: 2px solid #ffcc00; /* Color de borde */
-    background-color: #f0f8f5; /* Fondo claro */
-    color: #333; /* Color del texto */
+    border: 2px solid #ffcc00;
+    background-color: #f0f8f5;
+    color: #333;
     font-size: 16px;
     font-weight: bold;
     transition: border-color 0.3s ease, background-color 0.3s ease;
-    outline: none; /* Quita el borde de enfoque predeterminado */
-    appearance: none; /* Quita la flecha por defecto en algunos navegadores */
+    outline: none;
+    appearance: none;
     cursor: pointer;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-  }
-  
-  /* Flecha personalizada en el select */
-  .nominado select::after {
-    content: '▼';
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #ffcc00;
-    border: 2px;
-  }
-  
-  /* Cambios en el select al enfocarse o hacer hover */
-  .nominado select:hover {
-    border-color: #ffcc00; /* Color de borde al pasar el cursor */
-    background-color: #e9f7ef; /* Fondo al pasar el cursor */
-  }
-  
-  /* Estilo de las opciones del select */
-  .nominado select option {
-    background-color: #ffffff; /* Fondo de las opciones */
-    color: #333;
-    padding: 10px;
-    font-size: 14px;
-  }
-  
-  /* Color de fondo de la opción seleccionada */
-  .nominado select option:checked {
-    background-color: #ffcc00;
-    color: #ffffff;
-  }
-  
-  .nominado-options {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nominado-options {
     display: flex;
-    gap: 10px; /* Espacio entre el botón y el selector */
-    align-items: center; /* Alinea verticalmente en el centro */
+    gap: 10px;
+    align-items: center;
     justify-content: center;
-    margin-top: 10px; /* Espacio superior para separación del contenido anterior */
-  }
+    margin-top: 10px;
+}
 
-/* Barra de progreso de premios */
 .progress-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro semi-transparente */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 2000; /* Asegura que la barra esté siempre sobre otros elementos */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2000;
 }
 
-/* Puntos de progreso */
 .progress-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #ccc; /* Color gris para puntos inactivos */
-  margin: 0 5px; /* Espaciado horizontal entre puntos */
-  transition: background-color 0.3s ease; /* Transición suave para cambio de color */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Punto activo (indica el premio actual) */
 .progress-dot.active {
-  background-color: #ffcc00; /* Color dorado para el punto activo */
+    background-color: #ffcc00;
+    transform: scale(1.5);
 }

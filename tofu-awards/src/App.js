@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/auth/Login/Login';
 import PasswordPrompt from './components/auth/PasswordPromt/PasswordPromt';
 import VotingScreen from './components/home/Voting'; // Actualizado a VotingScreen
+import PScreen from './components/screen/pscreen/pscreen';
 
 const App = () => {
 
@@ -26,6 +27,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<PasswordPrompt />} />
+        <Route path="/screen" element={<PScreen />} />
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<VotingScreen premioIds={premioIds} />} />
       </Routes>
