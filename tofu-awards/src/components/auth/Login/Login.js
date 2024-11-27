@@ -49,7 +49,7 @@ const Login = () => {
 
       console.log("Usuario autenticado:", user);
       alert(`Login successful! User: ${user.email}`);
-      navigate('/home'); // Redirige a la página de votación
+      navigate('/password-prompt'); // Redirige a la página de PasswordPrompt
     } catch (error) {
       console.error("Error al iniciar sesión:", error.code, error.message);
       if (error.code === 'auth/user-not-found') {
@@ -111,7 +111,7 @@ const Login = () => {
       const user = result.user;
       console.log("Usuario autenticado con Google:", user);
       alert(`Login successful with Google! User: ${user.email}`);
-      navigate('/home'); // Redirige a la página de votación
+      navigate('/password-prompt'); // Redirige a la página de PasswordPrompt
     } catch (error) {
       console.error("Error al iniciar sesión con Google:", error.message);
       alert("Error al iniciar sesión con Google");

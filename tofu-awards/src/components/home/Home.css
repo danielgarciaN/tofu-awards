@@ -1,0 +1,168 @@
+.home-container {
+    font-family: 'Playfair Display', serif;
+    color: #ffda95; /* Utilizando el color amarillo claro de la paleta */
+    background-color: #000000; /* Fondo negro general */
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    overflow-x: hidden; /* Oculta cualquier desbordamiento horizontal */
+}
+
+.top-banner {
+    position: relative;
+    background: linear-gradient(135deg, #000000, #723737); /* Fondo negro a marrón oscuro */
+    height: 350px; /* Incrementar altura para más presencia */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+    text-align: center;
+    margin-bottom: 0; /* Elimina separación con la siguiente sección */
+}
+
+.banner-title {
+    font-size: 5rem; /* Incrementar tamaño de fuente */
+    color: #FFDD44; /* Color amarillo */
+    font-weight: bold;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px #FF4500; /* Sombra roja y blanca */
+    margin: 0; /* Elimina margen interno del título */
+}
+
+.text-container {
+    margin: 0 auto;
+    width: 60%;
+    padding: 10px 50px; /* Reducir padding interno para una apariencia más comprimida */
+    line-height: 1.5; /* Reducir el espacio entre líneas */
+    box-sizing: border-box; /* Asegura que padding se incluya en el ancho */
+}
+
+.text-container h1,
+.text-container h2 {
+    font-size: 2.8rem; /* Reducir tamaño del título */
+    color: #FFDD44; /* Color amarillo */
+    text-shadow: 0 0 5px #ffcc00, 0 0 10px #ff4500; /* Sombra amarilla y roja */
+    margin-bottom: 10px; /* Reducir margen inferior para compresión */
+}
+
+.text-container p {
+    font-size: 1.3rem; /* Reducir tamaño de la fuente */
+    margin: 3px 0; /* Reducir margen entre párrafos para una apariencia comprimida */
+    color: #ffffff; /* Color blanco */
+}
+
+.full-width-section {
+    width: 100%; /* Ajuste de ancho para ocupar toda la pantalla sin desbordarse */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Colocar el texto a la izquierda */
+    padding: 40px 100px; /* Ajuste para alinear la imagen y el texto */
+    margin: 50px 0; /* Añadir más margen superior e inferior entre secciones */
+    text-align: left; /* Alineación de texto a la izquierda */
+    gap: 40px; /* Espacio entre la imagen y el texto */
+    box-sizing: border-box; /* Asegura que padding se incluya en el ancho */
+}
+
+.full-width-section img {
+    width: 35%;
+    max-width: 450px; /* Define un ancho máximo */
+    border-radius: 10px; /* Bordes redondeados */
+}
+
+.full-width-section .text-content {
+    width: 40%;
+    color: #ffffff; /* Color blanco */
+    text-align: left; /* Alineación de texto a la izquierda */
+    font-size: 1.5rem; /* Tamaño de la fuente */
+    margin-left: 100px; /* Mover el contenedor más a la derecha */
+}
+
+.event-details {
+    background: linear-gradient(135deg, #000000, #723737); /* Fondo negro a marrón oscuro */;
+    padding: 30px 60px;
+    color: #FFDD44; /* Color amarillo */
+    margin: 50px 0; /* Añadir más margen superior e inferior entre secciones */
+    border-radius: 0; /* Remueve bordes redondeados */
+    text-align: left; /* Alineación del contenedor */
+    box-sizing: border-box; /* Asegura que padding se incluya en el ancho */
+}
+
+.event-details p {
+    margin: 3px 0; /* Reducir margen entre párrafos */
+    line-height: 1.3; /* Reducir el espacio entre líneas */
+    font-size: 1.3rem; /* Reducir tamaño de la fuente */
+}
+
+.intro-section,
+.voting-details {
+    padding: 30px 50px; /* Reducir padding para compactar */
+    background: #000000; /* Fondo negro */
+    color: #FFDD44; /* Color amarillo */
+    margin: 50px 0; /* Añadir más margen superior e inferior entre secciones */
+    border-radius: 0; /* Remueve bordes redondeados */
+    box-shadow: none; /* Elimina sombras */
+    text-align: left; /* Alineación de texto a la izquierda */
+    box-sizing: border-box; /* Asegura que padding se incluya en el ancho */
+}
+
+.voting-button-container {
+    text-align: center;
+    padding: 40px 0; /* Ajusta padding para mantener una separación controlada */
+}
+
+.start-voting-button {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; /* Reducir el tamaño de la fuente del botón */
+    background: linear-gradient(90deg, #FFDD44, #FF4500); /* De amarillo a rojo */
+    border: none;
+    color: #000000; /* Texto negro */
+    padding: 10px 20px; /* Reducir padding del botón */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.start-voting-button:hover {
+    background: linear-gradient(90deg, #FF4500, #FFDD44); /* De rojo a amarillo */
+    transform: scale(1.05);
+}
+
+@media screen and (max-width: 768px) {
+    .banner-title {
+        font-size: 3rem; /* Ajuste del tamaño del título en pantallas pequeñas */
+    }
+
+    .intro-section, .event-details, .voting-details {
+        padding: 20px;
+    }
+
+    .text-container {
+        padding: 10px 20px; /* Reducir padding en dispositivos pequeños */
+    }
+
+    .text-container h1,
+    .text-container h2 {
+        font-size: 2.5rem; /* Ajuste del tamaño del título en pantallas pequeñas */
+    }
+
+    .text-container p {
+        font-size: 1.1rem; /* Ajustar tamaño del texto en pantallas pequeñas */
+    }
+
+    .full-width-section {
+        flex-direction: column;
+        padding: 20px;
+        text-align: center; /* Alineación centrada en pantallas pequeñas */
+    }
+
+    .full-width-section img,
+    .full-width-section .text-content {
+        width: 90%;
+        margin-bottom: 20px;
+    }
+}

@@ -14,14 +14,39 @@
     gap: 20px;
     justify-content: center;
     opacity: 1;
-    transition: opacity 0.5s ease-in, transform 0.5s ease-in;
-    transform: translateX(0);
+    transition: opacity 0.5s ease-in-out;
 }
 
 .nominados-container.transitioning {
     opacity: 0;
-    transform: translateX(-20%);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.VotingTitle {
+    font-family: "Playfair Display", serif;
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffda95;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
+    margin-bottom: 20px;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.VotingTitle.transitioning {
+    opacity: 0;
+}
+
+.subtitle {
+    font-family: "Playfair Display", serif;
+    font-weight: bold;
+    color: #ffda95;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.subtitle.transitioning {
+    opacity: 0;
 }
 
 .nominado {
@@ -31,12 +56,25 @@
     font-weight: bold;
     color: #ffda95;
     text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.nominado.transitioning {
+    opacity: 0;
 }
 
 .nominado img {
     width: 300px;
     height: 200px;
-    border-radius: 10%;
+    border-radius: 5%;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.nominado img.transitioning {
+    opacity: 0;
+    transform: scale(0.9);
 }
 
 .nominado img:hover {
@@ -44,6 +82,8 @@
     transform: scale(1.05);
     transition: transform 0.3s ease, filter 0.3s ease;
 }
+
+/* Otros estilos que ya tienes */
 
 .vote-button {
     background-color: white;
@@ -119,6 +159,39 @@
     cursor: pointer;
 }
 
+
+.final-vote-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 12%;
+    margin-bottom: 20px; /* Asegura que esté cerca del final */
+}
+  
+
+.button-final-vote{
+    font-family: "Playfair Display", serif;
+    background: linear-gradient(45deg, #bb4444, #000000);
+    border: none;
+    color: #ffffff;
+    padding: 10px 25px;
+    width: 250px;
+    height: 50px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.button-final-vote:hover {
+    background: linear-gradient(90deg, #000, #bb4444);
+    transform: scale(1.05);
+}
+
 .button-next-back:hover {
     background: linear-gradient(90deg, #FF9933, #c48900);
     transform: scale(1.05);
@@ -148,23 +221,6 @@
     height: auto;
     z-index: -1;
     transform: translate(-50%, -50%);
-    filter: brightness(0.4);
-}
-
-.VotingTitle {
-    font-family: "Playfair Display", serif;
-    font-size: 4rem;
-    font-weight: bold;
-    color: #ffda95;
-    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
-    margin-bottom: 20px;
-}
-
-.subtitle {
-    font-family: "Playfair Display", serif;
-    font-weight: bold;
-    color: #ffda95;
-    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
 }
 
 .modal-overlay {
@@ -201,29 +257,28 @@
 }
 
 .modal-close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #ff0000; /* Rojo sólido para mejor visibilidad */
-  color: white;
-  border: none;
-  width: 25px; /* Tamaño reducido para ser menos intrusivo */
-  height: 25px; /* Tamaño reducido para ser menos intrusivo */
-  border-radius: 50%;
-  font-size: 16px; /* Tamaño del texto de la 'X' */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s ease, transform 0.2s ease;
-  z-index: 1500; /* Asegurarse de que esté por encima del resto del contenido */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff0000; /* Rojo sólido para mejor visibilidad */
+    color: white;
+    border: none;
+    width: 25px; /* Tamaño reducido para ser menos intrusivo */
+    height: 25px; /* Tamaño reducido para ser menos intrusivo */
+    border-radius: 50%;
+    font-size: 16px; /* Tamaño del texto de la 'X' */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease, transform 0.2s ease;
+    z-index: 1500; /* Asegurarse de que esté por encima del resto del contenido */
 }
 
 .modal-close-button:hover {
-  background: #cc0000; /* Un rojo más oscuro para el efecto hover */
-  transform: scale(1.1); /* Aumentar ligeramente el tamaño al pasar el ratón */
+    background: #cc0000; /* Un rojo más oscuro para el efecto hover */
+    transform: scale(1.1); /* Aumentar ligeramente el tamaño al pasar el ratón */
 }
-
 
 .modal-video {
     width: 100%;
@@ -280,4 +335,16 @@
 .progress-dot.active {
     background-color: #ffcc00;
     transform: scale(1.5);
+}
+
+
+.vote-selection{
+    text-align: center;
+    position: relative;
+    font-family: "Playfair Display", serif;
+    font-weight: bold;
+    color: #ffda95;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
 }

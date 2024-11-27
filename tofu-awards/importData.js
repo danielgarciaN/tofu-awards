@@ -12,135 +12,158 @@ const db = admin.firestore();
 const dataToImport = {
   premios: [
     {
-      nombre: "Premio a la Innovación Creativa",
-      descripcion: "Reconocimiento a las ideas más innovadoras.",
+      nombre: "Premio Tofu Del Año",
+      descripcion: "Este premio reconoce a la persona que más ha destacado en la categoría del tofu en este año.",
       nominados: [
         {
-          nombre: "Creativo de la Tecnología 1",
-          imageURL: "https://ejemplo.com/creativo1.jpg",
-          videoURL: "https://ejemplo.com/creativo1.mp4",
+          nombre: "Pau Molinero",
+          imageURL: "https://ejemplo.com/pau_molinero.jpg",
+          videoURL: "https://ejemplo.com/pau_molinero.mp4",
+          mediaImageURL: "https://ejemplo.com/pau_molinero_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Creativo de la Tecnología 2",
-          imageURL: "https://ejemplo.com/creativo2.jpg",
-          videoURL: "https://ejemplo.com/creativo2.mp4",
+          nombre: "Albert Perez",
+          imageURL: "https://ejemplo.com/albert_perez.jpg",
+          videoURL: "https://ejemplo.com/albert_perez.mp4",
+          mediaImageURL: "https://ejemplo.com/albert_perez_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Creativo de la Tecnología 3",
-          imageURL: "https://ejemplo.com/creativo3.jpg",
-          videoURL: "https://ejemplo.com/creativo3.mp4",
-          votes: 0,
-          votedUsers: {}
-        }
-      ]
-    },
-    {
-      nombre: "Premio a la Excelencia en las Artes",
-      descripcion: "Reconocimiento a los artistas que han destacado.",
-      nominados: [
-        {
-          nombre: "Artista Visionario 1",
-          imageURL: "https://ejemplo.com/artista1.jpg",
-          videoURL: "https://ejemplo.com/artista1.mp4",
+          nombre: "Marc Duran",
+          imageURL: "https://ejemplo.com/marc_duran.jpg",
+          videoURL: "https://ejemplo.com/marc_duran.mp4",
+          mediaImageURL: "https://ejemplo.com/marc_duran_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Artista Visionario 2",
-          imageURL: "https://ejemplo.com/artista2.jpg",
-          videoURL: "https://ejemplo.com/artista2.mp4",
-          votes: 0,
-          votedUsers: {}
-        }
-      ]
-    },
-    {
-      nombre: "Premio al Mejor Atleta del Año",
-      descripcion: "Reconocimiento al atleta que ha tenido un desempeño sobresaliente.",
-      nominados: [
-        {
-          nombre: "Atleta Destacado 1",
-          imageURL: "https://ejemplo.com/atleta1.jpg",
-          videoURL: "https://ejemplo.com/atleta1.mp4",
+          nombre: "Xavi Perez",
+          imageURL: "https://ejemplo.com/xavi_perez.jpg",
+          videoURL: "https://ejemplo.com/xavi_perez.mp4",
+          mediaImageURL: "https://ejemplo.com/xavi_perez_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Atleta Destacado 2",
-          imageURL: "https://ejemplo.com/atleta2.jpg",
-          videoURL: "https://ejemplo.com/atleta2.mp4",
+          nombre: "Carla Fuentes",
+          imageURL: "https://ejemplo.com/carla_fuentes.jpg",
+          videoURL: "https://ejemplo.com/carla_fuentes.mp4",
+          mediaImageURL: "https://ejemplo.com/carla_fuentes_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Atleta Destacado 3",
-          imageURL: "https://ejemplo.com/atleta3.jpg",
-          videoURL: "https://ejemplo.com/atleta3.mp4",
-          votes: 0,
-          votedUsers: {}
-        }
-      ]
-    },
-    {
-      nombre: "Premio a la Inspiración Social",
-      descripcion: "Reconocimiento a quienes impulsan el cambio positivo en la sociedad.",
-      nominados: [
-        {
-          nombre: "Inspirador Social 1",
-          imageURL: "https://ejemplo.com/inspirador1.jpg",
-          videoURL: "https://ejemplo.com/inspirador1.mp4",
+          nombre: "Anna Araguas",
+          imageURL: "https://ejemplo.com/anna_araguas.jpg",
+          videoURL: "https://ejemplo.com/anna_araguas.mp4",
+          mediaImageURL: "https://ejemplo.com/anna_araguas_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Inspirador Social 2",
-          imageURL: "https://ejemplo.com/inspirador2.jpg",
-          videoURL: "https://ejemplo.com/inspirador2.mp4",
+          nombre: "Arlet Ferrer",
+          imageURL: "https://ejemplo.com/arlet_ferrer.jpg",
+          videoURL: "https://ejemplo.com/arlet_ferrer.mp4",
+          mediaImageURL: "https://ejemplo.com/arlet_ferrer_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Inspirador Social 3",
-          imageURL: "https://ejemplo.com/inspirador3.jpg",
-          videoURL: "https://ejemplo.com/inspirador3.mp4",
-          votes: 0,
-          votedUsers: {}
-        }
-      ]
-    },
-    {
-      nombre: "Premio a la Mejor Película del Año",
-      descripcion: "Reconocimiento a las mejores producciones cinematográficas.",
-      nominados: [
-        {
-          nombre: "Cinta Épica 1",
-          imageURL: "https://ejemplo.com/pelicula1.jpg",
-          videoURL: "https://ejemplo.com/pelicula1.mp4",
+          nombre: "Jairo Rodriguez",
+          imageURL: "https://ejemplo.com/jairo_rodriguez.jpg",
+          videoURL: "https://ejemplo.com/jairo_rodriguez.mp4",
+          mediaImageURL: "https://ejemplo.com/jairo_rodriguez_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Cinta Épica 2",
-          imageURL: "https://ejemplo.com/pelicula2.jpg",
-          videoURL: "https://ejemplo.com/pelicula2.mp4",
+          nombre: "Joel Miranda",
+          imageURL: "https://ejemplo.com/joel_miranda.jpg",
+          videoURL: "https://ejemplo.com/joel_miranda.mp4",
+          mediaImageURL: "https://ejemplo.com/joel_miranda_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Cinta Épica 3",
-          imageURL: "https://ejemplo.com/pelicula3.jpg",
-          videoURL: "https://ejemplo.com/pelicula3.mp4",
+          nombre: "Ari Parera",
+          imageURL: "https://ejemplo.com/ari_parera.jpg",
+          videoURL: "https://ejemplo.com/ari_parera.mp4",
+          mediaImageURL: "https://ejemplo.com/ari_parera_media.jpg",
           votes: 0,
           votedUsers: {}
         },
         {
-          nombre: "Cinta Épica 4",
-          imageURL: "https://ejemplo.com/pelicula4.jpg",
-          videoURL: "https://ejemplo.com/pelicula4.mp4",
+          nombre: "Miriam Rodrigo",
+          imageURL: "https://ejemplo.com/miriam_rodrigo.jpg",
+          videoURL: "https://ejemplo.com/miriam_rodrigo.mp4",
+          mediaImageURL: "https://ejemplo.com/miriam_rodrigo_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Daniel Garcia",
+          imageURL: "https://ejemplo.com/daniel_garcia.jpg",
+          videoURL: "https://ejemplo.com/daniel_garcia.mp4",
+          mediaImageURL: "https://ejemplo.com/daniel_garcia_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Marti Molinero",
+          imageURL: "https://ejemplo.com/marti_molinero.jpg",
+          videoURL: "https://ejemplo.com/marti_molinero.mp4",
+          mediaImageURL: "https://ejemplo.com/marti_molinero_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Isaac Oliver",
+          imageURL: "https://ejemplo.com/isaac_oliver.jpg",
+          videoURL: "https://ejemplo.com/isaac_oliver.mp4",
+          mediaImageURL: "https://ejemplo.com/isaac_oliver_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Marti Benet",
+          imageURL: "https://ejemplo.com/marti_benet.jpg",
+          videoURL: "https://ejemplo.com/marti_benet.mp4",
+          mediaImageURL: "https://ejemplo.com/marti_benet_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Gerard Espinosa",
+          imageURL: "https://ejemplo.com/gerard_espinosa.jpg",
+          videoURL: "https://ejemplo.com/gerard_espinosa.mp4",
+          mediaImageURL: "https://ejemplo.com/gerard_espinosa_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "David Sender",
+          imageURL: "https://ejemplo.com/david_sender.jpg",
+          videoURL: "https://ejemplo.com/david_sender.mp4",
+          mediaImageURL: "https://ejemplo.com/david_sender_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Alex Sender",
+          imageURL: "https://ejemplo.com/alex_sender.jpg",
+          videoURL: "https://ejemplo.com/alex_sender.mp4",
+          mediaImageURL: "https://ejemplo.com/alex_sender_media.jpg",
+          votes: 0,
+          votedUsers: {}
+        },
+        {
+          nombre: "Victor Sender",
+          imageURL: "https://ejemplo.com/victor_sender.jpg",
+          videoURL: "https://ejemplo.com/victor_sender.mp4",
+          mediaImageURL: "https://ejemplo.com/victor_sender_media.jpg",
           votes: 0,
           votedUsers: {}
         }
@@ -166,6 +189,7 @@ const importData = async () => {
           nombre: nominado.nombre,
           imageURL: nominado.imageURL,
           videoURL: nominado.videoURL,
+          mediaImageURL: nominado.mediaImageURL,
           votes: nominado.votes,
           votedUsers: nominado.votedUsers,
         });
