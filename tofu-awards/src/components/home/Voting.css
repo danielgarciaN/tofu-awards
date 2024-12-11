@@ -214,14 +214,31 @@
 
 .final-vote-button-container {
     display: flex;
-    justify-content: center;
-    margin-top: 50px;
-    margin-bottom: 20px; /* Asegura que haya espacio debajo */
+    flex-direction: column; /* Alinea el mensaje y el botón verticalmente */
+    align-items: center; /* Centra los elementos */
+    justify-content: center; /* Centra los elementos en su contenedor */
+    margin-top: 20px;
+    margin-bottom: 20px; /* Espacio debajo */
+    gap: 15px; /* Espacio consistente entre el mensaje y el botón */
 }
 
-  
+.message {
+    color: #ffcc00; /* Amarillo para consistencia */
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    visibility: hidden; /* Oculta el mensaje por defecto, pero ocupa espacio */
+    opacity: 0; /* Inicialmente transparente */
+    transition: opacity 0.3s ease-in-out; /* Suaviza la transición al mostrar/ocultar */
+    min-height: 1.5rem; /* Reserva espacio incluso cuando no hay mensaje */
+}
 
-.button-final-vote{
+.message.visible {
+    visibility: visible; /* Hace visible el mensaje */
+    opacity: 1; /* Hace el mensaje opaco */
+}
+
+.button-final-vote {
     font-family: "Playfair Display", serif;
     background: linear-gradient(45deg, #bb4444, #000000);
     border: none;
@@ -338,16 +355,6 @@
     height: auto;
 }
 
-.message {
-  color: #ffeb3b;; /* Texto negro */
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px;
-  margin: 20px 0;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
 
 
 .nominado select {
