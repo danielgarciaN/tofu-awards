@@ -7,6 +7,9 @@ import PasswordPrompt from './components/auth/PasswordPromt/PasswordPromt';
 import Home from './components/home/Home'; // Nueva pantalla de Home
 import VotingScreen from './components/home/Voting'; // Pantalla de votación
 import FinalVote from './components/home/FinalVote';
+import Goodbye from './components/home/Goodbye'
+import Resultados from './components/home/Resultados';
+import IntroduccionFinalVote from './components/home/IntroduccionFinalVote';
 
 const AppWrapper = () => {
   return (
@@ -20,23 +23,24 @@ const App = () => {
   const auth = getAuth();
   const navigate = useNavigate();
   const premioIds = [
-    "18V7dToVVdLkOuXZQbGz",
-    "2Xn0ZXVZkNcLXzw9YShd",
-    "8Gq8Bi17lqseLiJUdVNR",
-    "8v24cFdTNCvUVbVQsuyg",
-    "BcN0Fkl0aQg6vIVeoVgi",
-    "DQdnafra6y5fTVNWS41c",
-    "DX6abhKES5GiZ7dIBhL7",
-    "EFXdxA0VwXMRUZT4pdTh",
-    "WQgq08qVERn900GjfHMv",
-    "WrPy0o0bZfwfQ0fOj3l",
-    "Y3ESrKGdj17EW2XjJxil",
-    "ofMK52NuIrtSIZJ36p7S",
-    "potnFWNSXguQxJyFpJgx", 
-    "t5S5f2lmUFBu0vOsAseS",
-    "t6812HZp0VLwc4QkGRjz"
+    "n7DYpw4Q9ARrw9Tdlqg7", //CUAJADA
+    "mdtyCFBavd4T2rTr04vX", //SOLTERO
+    "wXEzywuiBhsn2Wz5Q2ys", //XAVITADA
+    "JrjIN5s4hJxW1zmgLTLd", //FUTBOL
+    "V0UPK9tGKcxUnYy2G1Pj",  //DEPRESION
+    "RmcOv9Wny6smSLI7UpKb", //ANFI
+    "7S7F5TtzJJIxDTJdtHrU", //SENDER DEL AÑO
+    "yQvlpC0HDy6O10dTKpGe", //CLIPS DEL AÑO
+    "8PwRYH37sMdWi6SNKdiG", //DUO DE HERMANOS
+    "Ht0hkNMHL26U7dmmNrAs", //ENFADADO
+    "vBqlb3iqiVlvwgnnxlGA", //TIKTOK
+    "qPXGIH2loexuPWd3m0Si", //TOXI
+    "2TAtbgY6kOYl81mhqa77", //PUTERO DEL AÑO
+    "OpdEGSLUhL1nO0bfQ0BW",  //PAREJA
+    "HKsot8esvcMCZ65DdC6W", //DOMADO 
   ];
-
+  
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -52,9 +56,12 @@ const App = () => {
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/password-prompt" element={<PasswordPrompt />} />
+      <Route path="/resultados" element={<Resultados />} />
       <Route path="/home" element={<Home />} />
       <Route path="/voting" element={<VotingScreen premioIds={premioIds} />} />
       <Route path="/finalvote" element={<FinalVote />} />
+      <Route path="/goodbye" element={<Goodbye />} />
+      <Route path='/introfinal' element={<IntroduccionFinalVote/>}/>
     </Routes>
   );
 };

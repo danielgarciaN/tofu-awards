@@ -1,0 +1,75 @@
+.resultados-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #000000;
+    min-height: 100vh;
+  }
+  
+  .ResultadosTitle {
+    font-family: "Playfair Display", serif;
+    font-size: 3rem;
+    color: #ff9933;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .ganadores-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .ganador-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    width: 250px;
+  }
+  
+  .premio-title {
+    font-family: "Playfair Display", serif;
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .ganador-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .ganador-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  
+  .ganador-name {
+    font-family: "Playfair Display", serif;
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
+  .no-ganadores {
+    font-family: "Playfair Display", serif;
+    font-size: 1.5rem;
+    color: #999;
+    text-align: center;
+  }
+  
+  .loading-container {
+    font-family: "Playfair Display", serif;
+    font-size: 1.5rem;
+    color: #999;
+    text-align: center;
+    padding: 20px;
+  }
+  

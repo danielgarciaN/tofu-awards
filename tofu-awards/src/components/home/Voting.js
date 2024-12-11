@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "./../../firebase.js";
 import { doc, getDoc, getDocs, collection, updateDoc, setDoc } from "firebase/firestore";
-import { useLocation, useNavigate } from "react-router-dom"; // Importar useNavigate
+import { useLocation, useNavigate } from "react-router-dom";
 import './Voting.css';
 
 const Voting = ({ premioIds }) => {
@@ -16,6 +16,7 @@ const Voting = ({ premioIds }) => {
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMediaURL, setSelectedMediaURL] = useState("");
   const [isMediaVideo, setIsMediaVideo] = useState(false);
+  const [message, setMessage] = useState(""); // Mensaje en lugar de alert
   const location = useLocation();
   const navigate = useNavigate();
   const isPremium = location.state?.isPremium || false;
@@ -49,6 +50,7 @@ const Voting = ({ premioIds }) => {
         }
       } catch (error) {
         console.error("Error al obtener el premio:", error);
+        setMessage("Error al obtener el premio. Por favor, intenta de nuevo.");
       } finally {
         setLoading(false);
         setTimeout(() => setTransitioning(false), 500);
@@ -103,11 +105,14 @@ const Voting = ({ premioIds }) => {
   };
 
   const handleSubmitVotes = async () => {
+    setMessage(""); // Reiniciar mensaje
+
     const usedVotes = Object.values(selectedVotes);
     const uniqueVotes = new Set(usedVotes);
 
-    if (usedVotes.length !== nominados.length || usedVotes.length !== uniqueVotes.size) {
-      alert("Debes asignar una puntuación única a cada nominado antes de enviar.");
+    // Validar que haya exactamente 4 posiciones únicas seleccionadas
+    if (usedVotes.length !== 4 || uniqueVotes.size !== 4 || !["1", "2", "3", "4"].every(pos => usedVotes.includes(pos))) {
+      setMessage("Debes seleccionar un 1er, 2do, 3er y 4to puesto antes de enviar.");
       return;
     }
 
@@ -115,8 +120,32 @@ const Voting = ({ premioIds }) => {
       const userDocRef = doc(db, "users", user.uid);
 
       for (const nominadoId in selectedVotes) {
-        const vote = selectedVotes[nominadoId];
-        const points = isPremium ? vote * 2 : vote;
+        const votePosition = selectedVotes[nominadoId]; // Posición del voto
+        let points;
+
+        // Asignar puntos según la posición
+        switch (votePosition) {
+          case "1":
+            points = 5;
+            break;
+          case "2":
+            points = 3;
+            break;
+          case "3":
+            points = 1;
+            break;
+          case "4":
+            points = 0;
+            break;
+          default:
+            points = 0;
+        }
+
+        // Duplicar puntos si el usuario es premium
+        if (isPremium) {
+          points *= 2;
+        }
+
         const nominadoRef = doc(db, "premios", premioIds[currentIndex], "nominados", nominadoId);
 
         const nominadoDoc = await getDoc(nominadoRef);
@@ -127,34 +156,40 @@ const Voting = ({ premioIds }) => {
           [user.uid]: {
             email: user.email,
             timestamp: new Date().toISOString(),
-            vote: points
-          }
+            vote: points,
+          },
         };
 
         const totalPoints = Object.values(updatedVotedUsers).reduce((sum, userVote) => sum + userVote.vote, 0);
 
+        // Actualizar documento del nominado
         await updateDoc(nominadoRef, {
           votedUsers: updatedVotedUsers,
-          votes: totalPoints
+          votes: totalPoints,
         });
 
-        await setDoc(userDocRef, {
-          [premio.nombre]: {
-            [nominadoId]: points
-          }
-        }, { merge: true });
+        // Guardar el voto del usuario en su documento
+        await setDoc(
+          userDocRef,
+          {
+            [premio.nombre]: {
+              [nominadoId]: points,
+            },
+          },
+          { merge: true }
+        );
       }
 
-      alert("¡Votos enviados con éxito!");
+      setMessage("¡Votos enviados con éxito!");
       setSelectedVotes({});
     } catch (error) {
       console.error("Error al registrar los votos:", error);
-      alert("Error al registrar los votos. Intenta de nuevo.");
+      setMessage("Error al registrar los votos. Intenta de nuevo.");
     }
   };
 
   const handleFinalVote = () => {
-    navigate('/finalvote'); 
+    navigate('/introfinal');
   };
 
   return (
@@ -205,7 +240,7 @@ const Voting = ({ premioIds }) => {
                                   value={selectedVotes[nominado.id] || "-"}
                               >
                                   <option value="-">-</option>
-                                  {Array.from({ length: nominados.length }, (_, i) => (
+                                  {Array.from({ length: 4 }, (_, i) => (
                                       <option key={i + 1} value={i + 1}>{i + 1}</option>
                                   ))}
                               </select>
@@ -225,11 +260,14 @@ const Voting = ({ premioIds }) => {
         </div>
         
         <button className="button-voting" onClick={handleSubmitVotes} style={{ marginTop: "20px" }}>
-            Enviar Votos
+          Enviar Votos
         </button>
 
+        {message && <p className="message" style={{ marginTop: "10px" }}>{message}</p>}
+
+
         <div className="final-vote-button-container">
-          <button className="button-final-vote" onClick={handleFinalVote} style={{ marginTop: "40px" }}>
+          <button className="button-final-vote" onClick={handleFinalVote}>
               Votar Premio Final
           </button>
         </div>

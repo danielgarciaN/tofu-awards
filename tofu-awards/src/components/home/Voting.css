@@ -17,6 +17,22 @@
     transition: opacity 0.5s ease-in-out;
 }
 
+.tofu-description {
+    font-family: "Playfair Display", serif; /* Usa la misma fuente que el resto de la página */
+    font-size: 1.8rem; /* Ajusta el tamaño de fuente según necesidad */
+    font-weight: bold;
+    color: #ffda95; /* Color dorado suave */
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00; /* Efecto de brillo dorado */
+    text-align: center; /* Centra el texto horizontalmente */
+    margin: 20px 40px; /* Margen superior/inferior y lateral */
+    line-height: 1.5; /* Aumenta el interlineado para mejor legibilidad */
+    padding: 10px 20px; /* Espaciado interno para crear separación visual */
+    border-radius: 8px; /* Bordes redondeados */
+    background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente para destacar el texto */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra suave */
+}
+  
+
 .nominados-container.transitioning {
     opacity: 0;
 }
@@ -83,6 +99,42 @@
     transition: transform 0.3s ease, filter 0.3s ease;
 }
 
+.nominado-image-primero{
+    margin-left: 50px;
+    width: 300px;
+    height: 200px;
+    border-radius: 5%;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.nominado-image-primero:hover{
+    filter: brightness(1.2);
+    transform: scale(1.05);
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+.nominado-image-primero.transitioning{
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.nominado-image{
+    width: 200px;
+    height: 100px;
+    border-radius: 5%;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.nominado-image:hover{
+    filter: brightness(1.2);
+    transform: scale(1.05);
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+.nominado-image.transitioning{
+    opacity: 0;
+    transform: scale(0.9);
+}
 /* Otros estilos que ya tienes */
 
 .vote-button {
@@ -163,9 +215,10 @@
 .final-vote-button-container {
     display: flex;
     justify-content: center;
-    margin-top: 12%;
-    margin-bottom: 20px; /* Asegura que esté cerca del final */
+    margin-top: 50px;
+    margin-bottom: 20px; /* Asegura que haya espacio debajo */
 }
+
   
 
 .button-final-vote{
@@ -285,6 +338,18 @@
     height: auto;
 }
 
+.message {
+  color: #ffeb3b;; /* Texto negro */
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
 .nominado select {
     width: auto;
     padding: 5px 10px;
@@ -337,6 +402,33 @@
     transform: scale(1.5);
 }
 
+/* Estilo para el selector personalizado */
+.vote-select {
+    font-family: "Playfair Display", serif;
+    font-weight: bold;
+    color: #333;
+    background: linear-gradient(90deg, #FFDD44, #FF9933);
+    border: 2px solid #ffcc00;
+    border-radius: 8px;
+    padding: 10px;
+    appearance: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+    outline: none;
+    text-align: center;
+    text-shadow: 0 0 3px #ffcc00, 0 0 5px #ffcc00;
+}
+
+.vote-select:hover {
+    background: linear-gradient(90deg, #FF9933, #c48900);
+    transform: scale(1.05);
+}
+
+.vote-select:focus {
+    border-color: #c48900;
+}
+
 
 .vote-selection{
     text-align: center;
@@ -348,3 +440,16 @@
     opacity: 1;
     transition: opacity 0.5s ease-in-out;
 }
+
+.voting-container.goodbye-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+  
+  .goodbye-content {
+    text-align: center;
+  }
+  

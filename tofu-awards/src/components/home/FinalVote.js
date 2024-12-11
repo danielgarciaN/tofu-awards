@@ -1,40 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "./../../firebase.js";
-import { doc, getDocs, collection, updateDoc, setDoc } from "firebase/firestore";
-import { useLocation } from "react-router-dom";
-import './Voting.css'; // Reutiliza los estilos de Voting
+import { collection, getDocs, doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import { useLocation, useNavigate } from "react-router-dom";
+import './Voting.css';
 
-const FinalVote = ({ finalNominados = [] }) => {
+const FinalVote = () => {
   const [selectedVotes, setSelectedVotes] = useState({ primero: "", segundo: "", tercero: "" });
-  const [displayNominado, setDisplayNominado] = useState({ primero: null, segundo: null, tercero: null });
+  const [finalNominados, setFinalNominados] = useState([]);
+  const [displayNominados, setDisplayNominados] = useState({});
   const [transitioning, setTransitioning] = useState(false);
+  const [message, setMessage] = useState(""); // Estado para el mensaje
   const user = auth.currentUser;
   const location = useLocation();
+  const navigate = useNavigate();
   const isPremium = location.state?.isPremium || false;
 
   useEffect(() => {
-    setTransitioning(true);
-    setTimeout(() => setTransitioning(false), 500);
+    const fetchNominados = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "premios", "fcCXt3CVpErT99cSz5yw", "nominados"));
+        const nominadosList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setFinalNominados(nominadosList);
+      } catch (error) {
+        console.error("Error al obtener los nominados:", error);
+      }
+    };
 
-    // Update displayed nominado when any of the selections change
-    setDisplayNominado({
-      primero: finalNominados.find((nominado) => nominado.nombre === selectedVotes.primero) || null,
-      segundo: finalNominados.find((nominado) => nominado.nombre === selectedVotes.segundo) || null,
-      tercero: finalNominados.find((nominado) => nominado.nombre === selectedVotes.tercero) || null,
-    });
+    fetchNominados();
+  }, []);
+
+  useEffect(() => {
+    if (selectedVotes.primero || selectedVotes.segundo || selectedVotes.tercero) {
+      setTransitioning(true);
+      setTimeout(() => setTransitioning(false), 500);
+    }
+
+    const newDisplayNominados = {
+      primero: finalNominados.find(nominado => nominado.nombre === selectedVotes.primero),
+      segundo: finalNominados.find(nominado => nominado.nombre === selectedVotes.segundo),
+      tercero: finalNominados.find(nominado => nominado.nombre === selectedVotes.tercero),
+    };
+    setDisplayNominados(newDisplayNominados);
   }, [selectedVotes, finalNominados]);
 
   const handleSelectVote = (position, value) => {
-    // Ensure no duplicate votes
     if (Object.values(selectedVotes).includes(value)) {
-      alert("No puedes votar a la misma persona dos veces.");
+      setMessage("No puedes votar a la misma persona dos veces.");
       return;
     }
 
-    setSelectedVotes((prevVotes) => ({
+    setSelectedVotes(prevVotes => ({
       ...prevVotes,
       [position]: value,
     }));
+    setMessage(""); // Limpiar el mensaje cuando el voto se selecciona correctamente
   };
 
   const calculatePoints = (position) => {
@@ -52,23 +71,25 @@ const FinalVote = ({ finalNominados = [] }) => {
 
   const handleSubmitVotes = async () => {
     if (!selectedVotes.primero || !selectedVotes.segundo || !selectedVotes.tercero) {
-      alert("Debes asignar un voto único a cada posición antes de enviar.");
+      setMessage("Debes asignar un voto único a cada posición antes de enviar.");
       return;
     }
 
     try {
+      const userDocRef = doc(db, "users", user.uid);
+
       for (const position in selectedVotes) {
         const nominadoName = selectedVotes[position];
         const points = calculatePoints(position);
-        const nominadoDoc = finalNominados.find((nominado) => nominado.nombre === nominadoName);
+        const nominadoDoc = finalNominados.find(nominado => nominado.nombre === nominadoName);
         if (!nominadoDoc) {
           continue;
         }
 
-        const nominadoRef = doc(db, "finalVote", nominadoDoc.id);
+        const nominadoRef = doc(db, "premios", "j4qKPX8P0etuMnwSyOeY", "nominados", nominadoDoc.id);
 
-        const nominadoSnapshot = await getDocs(collection(db, "finalVote"));
-        const nominadoData = nominadoSnapshot.docs.find((doc) => doc.id === nominadoDoc.id)?.data() || {};
+        const nominadoSnapshot = await getDoc(nominadoRef);
+        const nominadoData = nominadoSnapshot.data();
 
         const updatedVotedUsers = {
           ...nominadoData.votedUsers,
@@ -87,7 +108,7 @@ const FinalVote = ({ finalNominados = [] }) => {
         });
 
         await setDoc(
-          doc(db, "users", user.uid),
+          userDocRef,
           {
             finalVote: {
               [nominadoDoc.nombre]: points,
@@ -97,11 +118,14 @@ const FinalVote = ({ finalNominados = [] }) => {
         );
       }
 
-      alert("¡Votos finales enviados con éxito!");
+      setMessage("¡Votos finales enviados con éxito!");
       setSelectedVotes({ primero: "", segundo: "", tercero: "" });
+
+      // Redirigir a la página de despedida después de enviar los votos finales
+      navigate('/goodbye');
     } catch (error) {
       console.error("Error al registrar los votos finales:", error);
-      alert("Error al registrar los votos. Intenta de nuevo.");
+      setMessage("Error al registrar los votos. Intenta de nuevo.");
     }
   };
 
@@ -115,70 +139,88 @@ const FinalVote = ({ finalNominados = [] }) => {
       <h1 className={`VotingTitle ${transitioning ? "transitioning" : ""}`}>
         Premio Tofu del Año 2024
       </h1>
+
+      {message && <p className="message">{message}</p>} {/* Mostrar mensajes */}
+
       <div className="final-vote-container">
-        <div className="vote-selection" style={{ marginBottom: "30px" }}>
-          <label htmlFor="primero">Primer puesto:</label>
+        <div className="vote-selection" style={{ marginBottom: "20px", display: "flex", alignItems: "center", fontSize: "30px", marginLeft: "40px" }}>
+          <label htmlFor="primero" style={{ flex: "1", whiteSpace: "nowrap", marginRight: "10px" }}>Primer puesto:</label>
           <select
             id="primero"
             value={selectedVotes.primero}
             onChange={(e) => handleSelectVote("primero", e.target.value)}
+            className="vote-select"
+            style={{ flex: "1" }}
           >
             <option value="">-</option>
-            {finalNominados.length > 0 &&
-              finalNominados.map((nominado) => (
-                <option key={nominado.id} value={nominado.nombre}>
-                  {nominado.nombre}
-                </option>
-              ))}
+            {finalNominados.map((nominado) => (
+              <option key={nominado.id} value={nominado.nombre}>
+                {nominado.nombre}
+              </option>
+            ))}
           </select>
-          {displayNominado.primero && (
-            <div className="nominado-display">
-              <h2>{displayNominado.primero.nombre}</h2>
-              <img src={displayNominado.primero.imageURL} alt={displayNominado.primero.nombre} />
+          {selectedVotes.primero && (
+            <div className={`nominado-display ${transitioning ? "transitioning" : ""}`} style={{ flex: "1", textAlign: "right" }}>
+              <img
+                src={displayNominados.primero?.imageURL}
+                alt={selectedVotes.primero}
+                className="nominado-image-primero"
+              />
             </div>
           )}
         </div>
-        <div className="vote-selection" style={{ marginBottom: "30px" }}>
-          <label htmlFor="segundo">Segundo puesto:</label>
+
+        {/* Segundo y Tercer puesto secciones */}
+        <div className="vote-selection" style={{ marginBottom: "20px", display: "flex", alignItems: "center", fontSize: "30px", marginLeft: "40px" }}>
+          <label htmlFor="segundo" style={{ flex: "1", whiteSpace: "nowrap", marginRight: "10px" }}>Segundo puesto:</label>
           <select
             id="segundo"
             value={selectedVotes.segundo}
             onChange={(e) => handleSelectVote("segundo", e.target.value)}
+            className="vote-select"
+            style={{ flex: "1" }}
           >
             <option value="">-</option>
-            {finalNominados.length > 0 &&
-              finalNominados.map((nominado) => (
-                <option key={nominado.id} value={nominado.nombre}>
-                  {nominado.nombre}
-                </option>
-              ))}
+            {finalNominados.map((nominado) => (
+              <option key={nominado.id} value={nominado.nombre}>
+                {nominado.nombre}
+              </option>
+            ))}
           </select>
-          {displayNominado.segundo && (
-            <div className="nominado-display">
-              <h2>{displayNominado.segundo.nombre}</h2>
-              <img src={displayNominado.segundo.imageURL} alt={displayNominado.segundo.nombre} />
+          {selectedVotes.segundo && (
+            <div className={`nominado-display ${transitioning ? "transitioning" : ""}`} style={{ flex: "1", textAlign: "right" }}>
+              <img
+                src={displayNominados.segundo?.imageURL}
+                alt={selectedVotes.segundo}
+                className="nominado-image"
+              />
             </div>
           )}
         </div>
-        <div className="vote-selection" style={{ marginBottom: "30px" }}>
-          <label htmlFor="tercero">Tercer puesto:</label>
+
+        <div className="vote-selection" style={{ marginBottom: "20px", display: "flex", alignItems: "center", fontSize: "30px", marginLeft: "40px" }}>
+          <label htmlFor="tercero" style={{ flex: "1", whiteSpace: "nowrap", marginRight: "10px" }}>Tercer puesto:</label>
           <select
             id="tercero"
             value={selectedVotes.tercero}
             onChange={(e) => handleSelectVote("tercero", e.target.value)}
+            className="vote-select"
+            style={{ flex: "1" }}
           >
             <option value="">-</option>
-            {finalNominados.length > 0 &&
-              finalNominados.map((nominado) => (
-                <option key={nominado.id} value={nominado.nombre}>
-                  {nominado.nombre}
-                </option>
-              ))}
+            {finalNominados.map((nominado) => (
+              <option key={nominado.id} value={nominado.nombre}>
+                {nominado.nombre}
+              </option>
+            ))}
           </select>
-          {displayNominado.tercero && (
-            <div className="nominado-display">
-              <h2>{displayNominado.tercero.nombre}</h2>
-              <img src={displayNominado.tercero.imageURL} alt={displayNominado.tercero.nombre} />
+          {selectedVotes.tercero && (
+            <div className={`nominado-display ${transitioning ? "transitioning" : ""}`} style={{ flex: "1", textAlign: "right" }}>
+              <img
+                src={displayNominados.tercero?.imageURL}
+                alt={selectedVotes.tercero}
+                className="nominado-image"
+              />
             </div>
           )}
         </div>

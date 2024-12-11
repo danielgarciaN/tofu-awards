@@ -37,37 +37,38 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage("");
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
       // Verificamos si el usuario ha verificado su email
       if (!user.emailVerified) {
-        alert("Por favor, verifica tu correo electrónico antes de iniciar sesión.");
+        setMessage("Por favor, verifica tu correo electrónico antes de iniciar sesión.");
         return;
       }
 
       console.log("Usuario autenticado:", user);
-      alert(`Login successful! User: ${user.email}`);
+      setMessage(`¡Inicio de sesión exitoso! Usuario: ${user.email}`);
       navigate('/password-prompt'); // Redirige a la página de PasswordPrompt
     } catch (error) {
       console.error("Error al iniciar sesión:", error.code, error.message);
       if (error.code === 'auth/user-not-found') {
-        alert("No hay un usuario registrado con ese correo electrónico.");
+        setMessage("No hay un usuario registrado con ese correo electrónico.");
       } else if (error.code === 'auth/wrong-password') {
-        alert("La contraseña es incorrecta.");
+        setMessage("La contraseña es incorrecta.");
       } else {
-        alert("Error al iniciar sesión: " + error.message);
+        setMessage("Error al iniciar sesión: " + error.message);
       }
     }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-  
+    setMessage("");
     // Verifica que las contraseñas coincidan
     if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      setMessage("Las contraseñas no coinciden");
       return;
     }
   
@@ -78,7 +79,7 @@ const Login = () => {
   
       // Enviar email de verificación
       await sendEmailVerification(user);
-      alert(`Registro exitoso! Verifica tu correo electrónico para continuar.`);
+      setMessage(`¡Registro exitoso! Verifica tu correo electrónico para continuar.`);
   
       // Guardar información adicional en Firestore
       await setDoc(doc(db, "users", user.uid), {
@@ -90,31 +91,33 @@ const Login = () => {
       navigate('/login'); // Redirige a la página de inicio de sesión
     } catch (error) {
       console.error("Error al registrarse:", error.message);
-      alert("Error al registrarse: " + error.message);
+      setMessage("Error al registrarse: " + error.message);
     }
   };
   
   const handleResetPassword = async () => {
+    setMessage("");
     try {
       await sendPasswordResetEmail(auth, email);
-      alert("Email de restablecimiento de contraseña enviado");
+      setMessage("Email de restablecimiento de contraseña enviado");
     } catch (error) {
       console.error("Error al enviar el email de restablecimiento:", error.message);
-      alert("Error al enviar el email de restablecimiento");
+      setMessage("Error al enviar el email de restablecimiento");
     }
   };
 
   const handleGoogleLogin = async () => {
+    setMessage("");
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("Usuario autenticado con Google:", user);
-      alert(`Login successful with Google! User: ${user.email}`);
+      setMessage(`¡Inicio de sesión con Google exitoso! Usuario: ${user.email}`);
       navigate('/password-prompt'); // Redirige a la página de PasswordPrompt
     } catch (error) {
       console.error("Error al iniciar sesión con Google:", error.message);
-      alert("Error al iniciar sesión con Google");
+      setMessage("Error al iniciar sesión con Google");
     }
   };
 
@@ -127,6 +130,7 @@ const Login = () => {
       <div className="login-container">
         <div className="login-form">
           <h2>{isLogin ? "Iniciar Sesión" : "Registrarse"}</h2>
+          {message && <div className="message-container">{message}</div>} {/* Mensaje en pantalla */}
           <form onSubmit={isLogin ? handleLogin : handleSignup}>
             <div className="input-field">
               <input

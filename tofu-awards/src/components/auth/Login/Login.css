@@ -12,6 +12,11 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
+
+.message-container{
+  color: #eeff00
+}
+
 /* Contenedor del formulario */
 .login-container {
   font-family: "Playfair Display", serif;
@@ -178,3 +183,5 @@
   background-color: #9b9da0;
   transform: scale(1.05)
 }
+
+
