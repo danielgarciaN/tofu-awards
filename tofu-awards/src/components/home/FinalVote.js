@@ -30,11 +30,6 @@ const FinalVote = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedVotes.primero || selectedVotes.segundo || selectedVotes.tercero) {
-      setTransitioning(true);
-      setTimeout(() => setTransitioning(false), 500);
-    }
-
     const newDisplayNominados = {
       primero: finalNominados.find(nominado => nominado.nombre === selectedVotes.primero),
       segundo: finalNominados.find(nominado => nominado.nombre === selectedVotes.segundo),
@@ -53,7 +48,7 @@ const FinalVote = () => {
       ...prevVotes,
       [position]: value,
     }));
-    setMessage(""); // Limpiar el mensaje cuando el voto se selecciona correctamente
+    setMessage(""); // Limpia el mensaje al seleccionar correctamente
   };
 
   const calculatePoints = (position) => {
@@ -86,7 +81,7 @@ const FinalVote = () => {
           continue;
         }
 
-        const nominadoRef = doc(db, "premios", "j4qKPX8P0etuMnwSyOeY", "nominados", nominadoDoc.id);
+        const nominadoRef = doc(db, "premios", "fcCXt3CVpErT99cSz5yw", "nominados", nominadoDoc.id);
 
         const nominadoSnapshot = await getDoc(nominadoRef);
         const nominadoData = nominadoSnapshot.data();
