@@ -24,6 +24,7 @@ const Voting = ({ premioIds }) => {
   const fetchPremioAndNominados = async () => {
     setLoading(true);
     const premioId = premioIds[currentIndex];
+    setMessage(""); // Limpia el mensaje al cambiar de premio
 
     if (premiosData[premioId]) {
       setPremio(premiosData[premioId].premio);
@@ -110,9 +111,13 @@ const Voting = ({ premioIds }) => {
     setMessage("");
     const usedVotes = Object.values(selectedVotes);
     const uniqueVotes = new Set(usedVotes);
+    const isFourNominados = nominados.length === 4;
 
-    if (usedVotes.length !== 4 || uniqueVotes.size !== 4 || !["1", "2", "3", "4"].every((pos) => usedVotes.includes(pos))) {
-      setMessage("Debes seleccionar un 1er, 2do, 3er y 4to puesto antes de enviar.");
+    if (
+      (isFourNominados && (usedVotes.length !== 4 || uniqueVotes.size !== 4 || !["1", "2", "3", "4"].every((pos) => usedVotes.includes(pos)))) ||
+      (!isFourNominados && (usedVotes.length !== 3 || uniqueVotes.size !== 3 || !["1", "2", "3"].every((pos) => usedVotes.includes(pos))))
+    ) {
+      setMessage(`Debes seleccionar un ${isFourNominados ? "1er, 2do, 3er y 4to" : "1er, 2do y 3er"} puesto antes de enviar.`);
       return;
     }
 
@@ -134,7 +139,7 @@ const Voting = ({ premioIds }) => {
             points = 1;
             break;
           case "4":
-            points = 0;
+            points = isFourNominados ? 0 : undefined; // Solo aplica si hay 4 nominados
             break;
           default:
             points = 0;
