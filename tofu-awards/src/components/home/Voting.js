@@ -25,6 +25,7 @@ const Voting = ({ premioIds }) => {
     setLoading(true);
     const premioId = premioIds[currentIndex];
     setMessage(""); // Limpia el mensaje al cambiar de premio
+    setSelectedVotes({}); // Resetea los votos seleccionados
 
     if (premiosData[premioId]) {
       setPremio(premiosData[premioId].premio);
@@ -139,7 +140,7 @@ const Voting = ({ premioIds }) => {
             points = 1;
             break;
           case "4":
-            points = isFourNominados ? 0 : undefined; // Solo aplica si hay 4 nominados
+            points = isFourNominados ? 0 : undefined;
             break;
           default:
             points = 0;
@@ -248,10 +249,8 @@ const Voting = ({ premioIds }) => {
                 value={selectedVotes[nominado.id] || "-"}
               >
                 <option value="-">-</option>
-                {["1", "2", "3", "4"].map((pos) => (
-                  <option key={pos} value={pos}>
-                    {pos}
-                  </option>
+                {Array.from({ length: nominados.length }, (_, i) => (i + 1).toString()).map((pos) => (
+                  <option key={pos} value={pos}>{pos}</option>
                 ))}
               </select>
             </div>
@@ -269,12 +268,8 @@ const Voting = ({ premioIds }) => {
       </button>
 
       <div className="final-vote-button-container">
-        {/* Mensaje con espacio reservado */}
-        <p className={`message ${message ? "visible" : ""}`}>
-          {message}
-        </p>
+        <p className={`message ${message ? "visible" : ""}`}>{message}</p>
 
-        {/* Botón fijo */}
         <button className="button-final-vote" onClick={handleFinalVote}>
           Votar Premio Final
         </button>
