@@ -132,37 +132,88 @@
     transform: scale(1.05);
 }
 
-@media screen and (max-width: 768px) {
-    .banner-title {
-        font-size: 3rem; /* Ajuste del tamaño del título en pantallas pequeñas */
-    }
 
-    .intro-section, .event-details, .voting-details {
-        padding: 20px;
+
+@media screen and (max-width: 1024px) {
+    .banner-title {
+        font-size: 3.8rem;
     }
 
     .text-container {
-        padding: 10px 20px; /* Reducir padding en dispositivos pequeños */
+        width: 100%;
+        padding: 10px 20px;
     }
 
-    .text-container h1,
-    .text-container h2 {
-        font-size: 2.5rem; /* Ajuste del tamaño del título en pantallas pequeñas */
+    .full-width-section {
+        padding: 30px 40px;
+        gap: 24px;
     }
 
-    .text-container p {
-        font-size: 1.1rem; /* Ajustar tamaño del texto en pantallas pequeñas */
+    .full-width-section .text-content {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .home-container {
+        background-color: #0f0b0d;
+    }
+
+    .top-banner {
+        height: 220px;
+        clip-path: polygon(0 0, 100% 0, 100% 82%, 50% 100%, 0 82%);
+    }
+
+    .banner-title {
+        font-size: 2.3rem;
+        padding: 0 10px;
+    }
+
+    .intro-section, .event-details, .voting-details {
+        padding: 0;
+        margin: 24px 0;
     }
 
     .full-width-section {
         flex-direction: column;
-        padding: 20px;
-        text-align: center; /* Alineación centrada en pantallas pequeñas */
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        margin: 0;
+        text-align: center;
+        gap: 14px;
     }
 
-    .full-width-section img,
-    .full-width-section .text-content {
-        width: 90%;
-        margin-bottom: 20px;
+    .full-width-section img {
+        width: 100%;
+        max-width: 340px;
+    }
+
+    .text-container {
+        width: 100%;
+        padding: 0;
+    }
+
+    .text-container h1,
+    .text-container h2 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+
+    .text-container p,
+    .event-details p {
+        font-size: 1rem;
+        line-height: 1.45;
+    }
+
+    .voting-button-container {
+        padding: 24px 16px 32px;
+    }
+
+    .start-voting-button {
+        width: 100%;
+        max-width: 320px;
+        font-size: 1.2rem;
     }
 }

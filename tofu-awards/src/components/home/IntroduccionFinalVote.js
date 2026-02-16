@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Voting.css";
+import useIsMobile from "../../hooks/useIsMobile";
 
 const IntroduccionFinalVote = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleContinueToVoting = () => {
     navigate("/finalvote"); // Redirige al componente de votación final
@@ -11,10 +13,12 @@ const IntroduccionFinalVote = () => {
 
   return (
     <div className="voting-container">
-      <video autoPlay loop muted className="video-background">
-        <source src={require("./../../assets/videos/overlay (2).mp4")} type="video/mp4" />
-        Tu navegador no soporta el elemento de video.
-      </video>
+      {!isMobile && (
+        <video autoPlay loop muted className="video-background">
+          <source src={require("./../../assets/videos/overlay (2).mp4")} type="video/mp4" />
+          Tu navegador no soporta el elemento de video.
+        </video>
+      )}
 
       <h1 className="VotingTitle">Premio Tofu del Año</h1>
       <p className="tofu-description">

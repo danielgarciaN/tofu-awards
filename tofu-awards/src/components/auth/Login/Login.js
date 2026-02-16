@@ -5,6 +5,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import imageG from "./../../../assets/google.svg"; 
 import { useNavigate } from "react-router-dom"; // Importa useNavigate
 import './Login.css';
+import useIsMobile from "../../../hooks/useIsMobile";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -30,6 +31,7 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true); 
   const [message, setMessage] = useState(""); 
   const navigate = useNavigate(); // Inicializa useNavigate
+  const isMobile = useIsMobile();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -123,10 +125,12 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <video autoPlay loop muted className="video-background">
-        <source src={require('./../../../assets/videos/login.mp4')} type="video/mp4" />
-        Tu navegador no soporta el elemento de video.
-      </video>
+      {!isMobile && (
+        <video autoPlay loop muted className="video-background">
+          <source src={require('./../../../assets/videos/login.mp4')} type="video/mp4" />
+          Tu navegador no soporta el elemento de video.
+        </video>
+      )}
       <div className="login-container">
         <div className="login-form">
           <h2>{isLogin ? "Iniciar Sesión" : "Registrarse"}</h2>

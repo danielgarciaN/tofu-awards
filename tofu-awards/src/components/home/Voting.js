@@ -3,6 +3,7 @@ import { db, auth } from "./../../firebase.js";
 import { doc, getDoc, getDocs, collection, updateDoc, setDoc } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
 import './Voting.css';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const Voting = ({ premioIds }) => {
   const [premio, setPremio] = useState(null);
@@ -20,6 +21,7 @@ const Voting = ({ premioIds }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isPremium = location.state?.isPremium || false;
+  const isMobile = useIsMobile();
 
   const fetchPremioAndNominados = async () => {
     setLoading(true);
@@ -200,10 +202,12 @@ const Voting = ({ premioIds }) => {
 
   return (
     <div className={`voting-container ${transitioning ? "transitioning" : ""}`}>
-      <video autoPlay loop muted className="video-background">
-        <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
-        Tu navegador no soporta el elemento de video.
-      </video>
+      {!isMobile && (
+        <video autoPlay loop muted className="video-background">
+          <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
+          Tu navegador no soporta el elemento de video.
+        </video>
+      )}
 
       <div className="progress-bar">
         {premioIds.map((_, index) => (
