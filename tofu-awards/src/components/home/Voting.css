@@ -460,3 +460,106 @@
     text-align: center;
   }
   
+
+@media screen and (max-width: 768px) {
+    .voting-container {
+        min-height: 100vh;
+        height: auto;
+        padding: 70px 16px 24px;
+        background: #1b0f12;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .VotingTitle {
+        font-size: 2.1rem;
+        text-align: center;
+        margin: 10px 0;
+        line-height: 1.2;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 1rem;
+        margin: 0 0 12px;
+    }
+
+    .tofu-description {
+        margin: 12px 0;
+        font-size: 1rem;
+        line-height: 1.4;
+        padding: 12px;
+    }
+
+    .nominados-container {
+        width: 100%;
+        gap: 16px;
+    }
+
+    .nominado {
+        width: 100%;
+        max-width: 360px;
+    }
+
+    .nominado img,
+    .nominado-image-primero,
+    .nominado-image {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        margin-left: 0;
+    }
+
+    .nominado-options {
+        flex-wrap: wrap;
+    }
+
+    .navigation-buttons {
+        position: static;
+        width: 100%;
+        max-width: 360px;
+        padding: 0;
+        margin-top: 16px;
+        margin-bottom: 8px;
+    }
+
+    .button-voting,
+    .button-final-vote,
+    .button-next-back,
+    .videoButton {
+        width: 100%;
+        max-width: 360px;
+    }
+
+    .final-vote-button-container {
+        width: 100%;
+    }
+
+    .vote-selection {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px;
+        width: 100%;
+        margin: 0 0 16px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .vote-selection label,
+    .vote-selection select,
+    .vote-selection .nominado-display {
+        width: 100%;
+        text-align: center !important;
+        margin: 0 !important;
+    }
+
+    .progress-bar {
+        position: sticky;
+        top: 0;
+    }
+
+    .modal-content {
+        width: 92%;
+        padding: 14px;
+    }
+}

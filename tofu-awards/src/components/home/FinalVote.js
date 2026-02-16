@@ -3,6 +3,7 @@ import { db, auth } from "./../../firebase.js";
 import { collection, getDocs, doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
 import './Voting.css';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const FinalVote = () => {
   const [selectedVotes, setSelectedVotes] = useState({ primero: "", segundo: "", tercero: "" });
@@ -14,6 +15,7 @@ const FinalVote = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isPremium = location.state?.isPremium || false;
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchNominados = async () => {
@@ -126,10 +128,12 @@ const FinalVote = () => {
 
   return (
     <div className={`voting-container ${transitioning ? "transitioning" : ""}`}>
-      <video autoPlay loop muted className="video-background">
-        <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
-        Tu navegador no soporta el elemento de video.
-      </video>
+      {!isMobile && (
+        <video autoPlay loop muted className="video-background">
+          <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
+          Tu navegador no soporta el elemento de video.
+        </video>
+      )}
 
       <h1 className={`VotingTitle ${transitioning ? "transitioning" : ""}`}>
         Premio Tofu del Año 2024

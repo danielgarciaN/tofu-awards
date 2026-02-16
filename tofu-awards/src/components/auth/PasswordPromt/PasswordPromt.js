@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PasswordPrompt.css';
+import useIsMobile from '../../../hooks/useIsMobile';
 
 const PasswordPrompt = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const SECRET_PASSWORD = 'XaviButanero';
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,10 +28,12 @@ const PasswordPrompt = () => {
 
   return (
     <div className="background">
-      <video autoPlay loop muted className="video-background">
-        <source src={require('./../../../assets/videos/overlay.mp4')} type="video/mp4" />
-        Tu navegador no soporta el elemento de video.
-      </video>
+      {!isMobile && (
+        <video autoPlay loop muted className="video-background">
+          <source src={require('./../../../assets/videos/overlay.mp4')} type="video/mp4" />
+          Tu navegador no soporta el elemento de video.
+        </video>
+      )}
       <div className="password-container">
         <h1 className="title">TOFU AWARDS</h1>
         <h2 className="subtitle">INTRODUCE LA CONTRASEÑA SECRETA</h2>
