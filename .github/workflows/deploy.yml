@@ -14,15 +14,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16 # O la versión compatible con tu proyecto
+          node-version: 18
+          cache: npm
+          cache-dependency-path: tofu-awards/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+        working-directory: tofu-awards
 
       - name: Build project
         run: npm run build
+        working-directory: tofu-awards
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
