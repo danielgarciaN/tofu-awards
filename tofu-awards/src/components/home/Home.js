@@ -1,91 +1,203 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import './Home.css';
-import foto1 from './../../assets/fotos/foto1.jpeg';
-import foto2 from './../../assets/fotos/foto2.jpg';
-import foto3 from './../../assets/fotos/foto3.jpeg';
+import React, { useMemo } from "react";
+import { signOut } from "firebase/auth";
+import { useLocation, useNavigate } from "react-router-dom";
+import "./Home.css";
+import foto1 from "./../../assets/fotos/foto1.jpeg";
+import foto2 from "./../../assets/fotos/foto2.jpg";
+import foto3 from "./../../assets/fotos/foto3.jpeg";
+import { auth } from "../../firebase";
+import {
+  clearStoredAccessMode,
+  getStoredAccessMode,
+  isPremiumAccess,
+} from "../../utils/accessMode";
+import { getPointsBreakdown } from "../../utils/voting";
 
 const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const accessMode = location.state?.accessMode || getStoredAccessMode();
+  const isPremium = isPremiumAccess(accessMode);
+  const standardPoints = getPointsBreakdown(4, false);
+  const standardThreePoints = getPointsBreakdown(3, false);
+  const premiumPoints = getPointsBreakdown(4, true);
+  const premiumThreePoints = getPointsBreakdown(3, true);
+  const accessBanner = useMemo(() => {
+    if (!location.state?.accessUnlocked) {
+      return "";
+    }
 
-  const isPremium = location.state?.isPremium || false;
+    return isPremium
+      ? "Modo premium activado. Las categorias premium usaran la ponderacion especial 8-5-2-0."
+      : "Acceso privado validado. Ya puedes continuar con el flujo principal sin pantallas extra.";
+  }, [isPremium, location.state]);
 
   const handleStartVoting = () => {
-    navigate('/voting', { state: { isPremium } }); // Pasar isPremium al componente de votación
+    navigate("/voting", {
+      state: {
+        accessMode,
+        isPremium,
+      },
+    });
+  };
+
+  const handlePrivateAccess = () => navigate("/password-prompt");
+
+  const handleLogout = async () => {
+    clearStoredAccessMode();
+    await signOut(auth);
   };
 
   return (
     <div className="home-container">
-      {/* Sección de título principal similar a la imagen */}
-      <section className="top-banner">
-        <h1 className="banner-title">TOFU AWARDS</h1>
-      </section>
+      <section className="home-hero">
+        <div className="home-hero-copy">
+          <p className="home-kicker">Tofu Awards II</p>
+          <h1>La segunda edicion llega mas tarde que nunca.</h1>
+          <p className="home-lead">
+            Han pasado muchas cosas, el grupo ha vivido nuevas experiencias y ya toca lo que de
+            verdad importa: celebrar la segunda gala con una web mas pulida, mas clara y preparada
+            para votar desde movil.
+          </p>
 
-      {/* Sección introductoria */}
-      <section className="intro-section">
-        <div className="full-width-section">
-          <div className="text-container">
-            <h1>Un reconocimiento único</h1>
-            <br/>
-            <p>
-              Los Premios Tofu no solo celebran la creatividad y el esfuerzo, sino que también buscan inmortalizar esos momentos inolvidables que nos hicieron reír, emocionarnos, y, por supuesto, nos llenaron de recuerdos únicos.
-            </p>
-            <br/>
-            <p>
-              Los Premios Tofu nacen de la necesidad de unir a nuestro grupo en un evento donde lo importante no es quién gane, sino cómo disfrutamos juntos reviviendo esos momentos.
-            </p>
+          <div className="hero-meta">
+            <span>Segunda edicion</span>
+            <span>Ubicacion por decidir</span>
+            <span>Votacion adaptada a movil</span>
           </div>
-          <img src={foto1} alt="Imagen de la ceremonia Tofu Awards" />
+
+          <div className="hero-actions">
+            <button className="start-voting-button" onClick={handleStartVoting}>
+              Empezar votacion
+            </button>
+            <button className="ghost-button" onClick={handlePrivateAccess}>
+              Acceso privado
+            </button>
+            <button className="ghost-button subtle" onClick={handleLogout}>
+              Cerrar sesion
+            </button>
+          </div>
+
+          {accessBanner ? <p className="home-banner">{accessBanner}</p> : null}
+        </div>
+
+        <div className="home-hero-visual">
+          <img src={foto1} alt="Momentos compartidos del grupo en Tofu Awards" />
+          <div className="hero-visual-card">
+            <p className="hero-visual-kicker">Estado del evento</p>
+            <strong>La gala esta en camino</strong>
+            <span>
+              La ubicacion sigue siendo secreta por ahora. Se decidira mas adelante, como corresponde
+              a una ceremonia que sabe manejar el suspense.
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* Sección de fecha, ubicación y premio especial */}
-      <section className="event-details">
-        <div className="full-width-section">
-          <img src={foto2} alt="Ubicación del evento Tofu Awards" />
-          <div className="text-container">
-            <h2>Detalles del Evento</h2>
-            <p><strong>Fecha:</strong> 21 de diciembre a las 18:00</p>
-            <p><strong>Ubicación:</strong> Església de Valldoreix</p>
-            <br/>
+      <section className="home-grid">
+        <article className="home-panel">
+          <img src={foto2} alt="Ambientacion de la gala Tofu Awards" />
+          <div className="home-panel-copy">
+            <p className="home-kicker">Lo que cambia</p>
+            <h2>Una edicion mas refinada</h2>
             <p>
-              Este año, nos reuniremos en la icónica Església de Valldoreix. En este ambiente inmejorable, llevaremos a cabo el premio al <strong>"Mejor Outfit de la Noche"</strong>, un reconocimiento especial que será entregado en directo.
+              Esta web deja atras la sensacion improvisada del primer impulso y presenta una
+              experiencia mas limpia, elegante y estable. Menos ruido, mejor lectura y una
+              navegacion que te lleva del acceso a la votacion sin pasos innecesarios.
             </p>
-            <br/>
             <p>
-              Prepárate para lucir tus mejores galas, ya que habrá una <strong>alfombra roja</strong> para que todos podamos posar y mostrar nuestros outfits. No olvides traer algo de <strong>pica pica</strong> para compartir mientras celebramos.
+              La gran novedad es clara: ahora tambien puedes votar comodamente desde el movil, sin
+              renunciar a ver nominados, revisar material y cerrar tu voto final desde cualquier
+              pantalla.
             </p>
           </div>
+        </article>
+
+        <article className="home-panel reverse">
+          <img src={foto3} alt="Votacion de los nominados de Tofu Awards" />
+          <div className="home-panel-copy">
+            <p className="home-kicker">Tofu del Ano</p>
+            <h2>El premio mas serio dentro del caos</h2>
+            <p>
+              Tofu del Ano no premia al mas popular ni al que mejor te caiga ese dia. Reconoce a quien
+              ha rendido mejor durante el periodo, quien ha mantenido el nivel mas alto o quien ha
+              dejado la trayectoria general mas fuerte entre todos.
+            </p>
+            <p>
+              Vota pensando en rendimiento, constancia, impacto y capacidad real para haber estado por
+              encima del resto cuando tocaba aparecer.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <section className="home-rules">
+        <div className="rules-header">
+          <p className="home-kicker">Sistema de votacion</p>
+          <h2>Puntuacion actualizada para la segunda gala</h2>
+          <p>
+            En todas las categorias se vota por orden de preferencia. El ultimo puesto no suma puntos.
+            En las categorias premium ya no se duplica la tabla general: ahora tienen ponderacion
+            propia.
+          </p>
+        </div>
+
+        <div className="rules-grid">
+          <article className="rules-card">
+            <h3>Categorias normales</h3>
+            <p>Con 4 nominados</p>
+            <ul>
+              {standardPoints.map(({ position, points }) => (
+                <li key={`standard-four-${position}`}>
+                  <span>{position}o puesto</span>
+                  <strong>{points} pts</strong>
+                </li>
+              ))}
+            </ul>
+            <p>Con 3 nominados</p>
+            <ul>
+              {standardThreePoints.map(({ position, points }) => (
+                <li key={`standard-three-${position}`}>
+                  <span>{position}o puesto</span>
+                  <strong>{points} pts</strong>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="rules-card premium">
+            <h3>Categorias premium</h3>
+            <p>Con 4 nominados</p>
+            <ul>
+              {premiumPoints.map(({ position, points }) => (
+                <li key={`premium-four-${position}`}>
+                  <span>{position}o puesto</span>
+                  <strong>{points} pts</strong>
+                </li>
+              ))}
+            </ul>
+            <p>Con 3 nominados</p>
+            <ul>
+              {premiumThreePoints.map(({ position, points }) => (
+                <li key={`premium-three-${position}`}>
+                  <span>{position}o puesto</span>
+                  <strong>{points} pts</strong>
+                </li>
+              ))}
+            </ul>
+          </article>
         </div>
       </section>
 
-      {/* Sección explicando el funcionamiento de los votos */}
-      <section className="voting-details">
-        <div className="full-width-section">
-          <div className="text-container">
-            <h2>¿Cómo Funcionan los Votos?</h2>
-            <br/>
-            <p>
-              Cada categoría cuenta con un grupo de nominados. Se podrá votar por los mejores en orden de preferencia del 1 al 3 o del 1 al 4, dependiendo de la cantidad de nominados. Además, se podrá ver un video relacionado con cada nominado para ayudar en la decisión.
-            </p>
-            <br/>
-            <p>
-              Podrás votar hasta el 18 de diciembre y cada vez que ingreses podrás actualizar tus votos, asegurándote de que tu decisión sea la correcta hasta el último momento.
-            </p>
-            <br/>
-            <p>
-              Cuando hayas acabado de votar, podrás darle a <strong>Votar Premio Final</strong> para votar al premio de Tofu del año.
-            </p>
-          </div>
-          <img src={foto3} alt="Funcionamiento de los votos" />
+      <section className="home-closing">
+        <div>
+          <p className="home-kicker">Siguiente paso</p>
+          <h2>Entra, vota y deja tu version oficial de la historia.</h2>
         </div>
+        <button className="start-voting-button" onClick={handleStartVoting}>
+          Ir a votar ahora
+        </button>
       </section>
-
-      {/* Botón al final para empezar a votar */}
-      <div className="voting-button-container">
-        <button className="start-voting-button" onClick={handleStartVoting}>Ir a Votar</button>
-      </div>
     </div>
   );
 };

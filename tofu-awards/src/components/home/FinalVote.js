@@ -1,233 +1,272 @@
-import React, { useEffect, useState } from "react";
-import { db, auth } from "./../../firebase.js";
-import { collection, getDocs, doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
-import './Voting.css';
-import useIsMobile from '../../hooks/useIsMobile';
+import { auth, db } from "./../../firebase.js";
+import "./Voting.css";
+import { getStoredAccessMode, isPremiumAccess } from "../../utils/accessMode";
+import { getPointsBreakdown, getPointsForPosition } from "../../utils/voting";
+
+const FINAL_AWARD_ID = "fcCXt3CVpErT99cSz5yw";
+const FINAL_POSITIONS = [
+  { key: "primero", label: "Primer puesto", rank: "1" },
+  { key: "segundo", label: "Segundo puesto", rank: "2" },
+  { key: "tercero", label: "Tercer puesto", rank: "3" },
+];
+
+const getNomineeName = (nominee) => nominee?.nombre || nominee?.name || "Nominado";
+const getNomineeImage = (nominee) => nominee?.imageURL || nominee?.imageUrl || nominee?.mediaUrl || "";
 
 const FinalVote = () => {
-  const [selectedVotes, setSelectedVotes] = useState({ primero: "", segundo: "", tercero: "" });
-  const [finalNominados, setFinalNominados] = useState([]);
-  const [displayNominados, setDisplayNominados] = useState({});
-  const [transitioning, setTransitioning] = useState(false);
-  const [message, setMessage] = useState(""); // Estado para el mensaje
-  const user = auth.currentUser;
-  const location = useLocation();
   const navigate = useNavigate();
-  const isPremium = location.state?.isPremium || false;
-  const isMobile = useIsMobile();
+  const location = useLocation();
+  const accessMode = location.state?.accessMode || getStoredAccessMode();
+  const isPremium = isPremiumAccess(accessMode) || Boolean(location.state?.isPremium);
+  const user = auth.currentUser;
+  const [selectedVotes, setSelectedVotes] = useState({
+    primero: "",
+    segundo: "",
+    tercero: "",
+  });
+  const [finalNominados, setFinalNominados] = useState([]);
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const scoreBreakdown = useMemo(() => getPointsBreakdown(3, isPremium), [isPremium]);
+  const displayNominados = useMemo(
+    () =>
+      FINAL_POSITIONS.reduce((accumulator, position) => {
+        accumulator[position.key] = finalNominados.find(
+          (nominado) => getNomineeName(nominado) === selectedVotes[position.key]
+        );
+        return accumulator;
+      }, {}),
+    [finalNominados, selectedVotes]
+  );
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchNominados = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "premios", "fcCXt3CVpErT99cSz5yw", "nominados"));
-        const nominadosList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setFinalNominados(nominadosList);
+        const querySnapshot = await getDocs(collection(db, "premios", FINAL_AWARD_ID, "nominados"));
+        const nominadosList = querySnapshot.docs.map((snapshot) => ({
+          id: snapshot.id,
+          ...snapshot.data(),
+        }));
+
+        if (!cancelled) {
+          setFinalNominados(nominadosList);
+        }
       } catch (error) {
-        console.error("Error al obtener los nominados:", error);
+        if (!cancelled) {
+          console.error("Error al obtener los nominados:", error);
+          setFeedback({
+            type: "error",
+            text: "No hemos podido cargar los finalistas del Tofu del Ano.",
+          });
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchNominados();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  useEffect(() => {
-    const newDisplayNominados = {
-      primero: finalNominados.find(nominado => nominado.nombre === selectedVotes.primero),
-      segundo: finalNominados.find(nominado => nominado.nombre === selectedVotes.segundo),
-      tercero: finalNominados.find(nominado => nominado.nombre === selectedVotes.tercero),
-    };
-    setDisplayNominados(newDisplayNominados);
-  }, [selectedVotes, finalNominados]);
-
   const handleSelectVote = (position, value) => {
-    if (Object.values(selectedVotes).includes(value)) {
-      setMessage("No puedes votar a la misma persona dos veces.");
+    const alreadyUsedByAnotherSlot = Object.entries(selectedVotes).some(
+      ([key, currentValue]) => key !== position && currentValue === value && value
+    );
+
+    if (alreadyUsedByAnotherSlot) {
+      setFeedback({
+        type: "error",
+        text: "Cada finalista solo puede ocupar una posicion del podio.",
+      });
       return;
     }
 
-    setSelectedVotes(prevVotes => ({
-      ...prevVotes,
+    setSelectedVotes((previousVotes) => ({
+      ...previousVotes,
       [position]: value,
     }));
-    setMessage(""); // Limpia el mensaje al seleccionar correctamente
-  };
-
-  const calculatePoints = (position) => {
-    switch (position) {
-      case "primero":
-        return isPremium ? 10 : 5;
-      case "segundo":
-        return isPremium ? 6 : 3;
-      case "tercero":
-        return isPremium ? 2 : 1;
-      default:
-        return 0;
-    }
+    setFeedback({ type: "", text: "" });
   };
 
   const handleSubmitVotes = async () => {
-    if (!selectedVotes.primero || !selectedVotes.segundo || !selectedVotes.tercero) {
-      setMessage("Debes asignar un voto único a cada posición antes de enviar.");
+    if (!user) {
+      navigate("/login", { replace: true });
       return;
     }
 
-    try {
-      const userDocRef = doc(db, "users", user.uid);
+    if (Object.values(selectedVotes).some((value) => !value)) {
+      setFeedback({
+        type: "error",
+        text: "Debes completar el podio entero antes de enviar el voto final.",
+      });
+      return;
+    }
 
-      for (const position in selectedVotes) {
-        const nominadoName = selectedVotes[position];
-        const points = calculatePoints(position);
-        const nominadoDoc = finalNominados.find(nominado => nominado.nombre === nominadoName);
+    setIsSubmitting(true);
+
+    try {
+      const finalVotePayload = {};
+
+      for (const position of FINAL_POSITIONS) {
+        const nominadoName = selectedVotes[position.key];
+        const nominadoDoc = finalNominados.find(
+          (candidate) => getNomineeName(candidate) === nominadoName
+        );
+
         if (!nominadoDoc) {
           continue;
         }
 
-        const nominadoRef = doc(db, "premios", "fcCXt3CVpErT99cSz5yw", "nominados", nominadoDoc.id);
+        const points = getPointsForPosition(position.rank, 3, isPremium);
+        finalVotePayload[getNomineeName(nominadoDoc)] = points;
 
+        const nominadoRef = doc(db, "premios", FINAL_AWARD_ID, "nominados", nominadoDoc.id);
         const nominadoSnapshot = await getDoc(nominadoRef);
-        const nominadoData = nominadoSnapshot.data();
-
+        const nominadoData = nominadoSnapshot.data() || {};
         const updatedVotedUsers = {
-          ...nominadoData.votedUsers,
+          ...(nominadoData.votedUsers || {}),
           [user.uid]: {
-            email: user.email,
+            email: user.email || "",
             timestamp: new Date().toISOString(),
             vote: points,
           },
         };
-
-        const totalPoints = Object.values(updatedVotedUsers).reduce((sum, userVote) => sum + userVote.vote, 0);
+        const totalPoints = Object.values(updatedVotedUsers).reduce(
+          (sum, userVote) => sum + (userVote.vote || 0),
+          0
+        );
 
         await updateDoc(nominadoRef, {
           votedUsers: updatedVotedUsers,
           votes: totalPoints,
         });
-
-        await setDoc(
-          userDocRef,
-          {
-            finalVote: {
-              [nominadoDoc.nombre]: points,
-            },
-          },
-          { merge: true }
-        );
       }
 
-      setMessage("¡Votos finales enviados con éxito!");
-      setSelectedVotes({ primero: "", segundo: "", tercero: "" });
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          finalVote: finalVotePayload,
+        },
+        { merge: true }
+      );
 
-      // Redirigir a la página de despedida después de enviar los votos finales
-      navigate('/goodbye');
+      navigate("/goodbye", { replace: true });
     } catch (error) {
       console.error("Error al registrar los votos finales:", error);
-      setMessage("Error al registrar los votos. Intenta de nuevo.");
+      setFeedback({
+        type: "error",
+        text: "No hemos podido guardar el voto final. Intentalo otra vez.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className={`voting-container ${transitioning ? "transitioning" : ""}`}>
-      {!isMobile && (
-        <video autoPlay loop muted className="video-background">
-          <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
-          Tu navegador no soporta el elemento de video.
-        </video>
-      )}
-
-      <h1 className={`VotingTitle ${transitioning ? "transitioning" : ""}`}>
-        Premio Tofu del Año 2024
-      </h1>
-
-      {message && <p className="message">{message}</p>} {/* Mostrar mensajes */}
-
-      <div className="final-vote-container">
-        <div className="vote-selection" style={{ marginBottom: "20px", display: "flex", alignItems: "center", fontSize: "30px", marginLeft: "40px" }}>
-          <label htmlFor="primero" style={{ flex: "1", whiteSpace: "nowrap", marginRight: "10px" }}>Primer puesto:</label>
-          <select
-            id="primero"
-            value={selectedVotes.primero}
-            onChange={(e) => handleSelectVote("primero", e.target.value)}
-            className="vote-select"
-            style={{ flex: "1" }}
-          >
-            <option value="">-</option>
-            {finalNominados.map((nominado) => (
-              <option key={nominado.id} value={nominado.nombre}>
-                {nominado.nombre}
-              </option>
-            ))}
-          </select>
-          {selectedVotes.primero && (
-            <div className={`nominado-display ${transitioning ? "transitioning" : ""}`} style={{ flex: "1", textAlign: "right" }}>
-              <img
-                src={displayNominados.primero?.imageURL}
-                alt={selectedVotes.primero}
-                className="nominado-image-primero"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Segundo y Tercer puesto secciones */}
-        <div className="vote-selection" style={{ marginBottom: "20px", display: "flex", alignItems: "center", fontSize: "30px", marginLeft: "40px" }}>
-          <label htmlFor="segundo" style={{ flex: "1", whiteSpace: "nowrap", marginRight: "10px" }}>Segundo puesto:</label>
-          <select
-            id="segundo"
-            value={selectedVotes.segundo}
-            onChange={(e) => handleSelectVote("segundo", e.target.value)}
-            className="vote-select"
-            style={{ flex: "1" }}
-          >
-            <option value="">-</option>
-            {finalNominados.map((nominado) => (
-              <option key={nominado.id} value={nominado.nombre}>
-                {nominado.nombre}
-              </option>
-            ))}
-          </select>
-          {selectedVotes.segundo && (
-            <div className={`nominado-display ${transitioning ? "transitioning" : ""}`} style={{ flex: "1", textAlign: "right" }}>
-              <img
-                src={displayNominados.segundo?.imageURL}
-                alt={selectedVotes.segundo}
-                className="nominado-image"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="vote-selection" style={{ marginBottom: "20px", display: "flex", alignItems: "center", fontSize: "30px", marginLeft: "40px" }}>
-          <label htmlFor="tercero" style={{ flex: "1", whiteSpace: "nowrap", marginRight: "10px" }}>Tercer puesto:</label>
-          <select
-            id="tercero"
-            value={selectedVotes.tercero}
-            onChange={(e) => handleSelectVote("tercero", e.target.value)}
-            className="vote-select"
-            style={{ flex: "1" }}
-          >
-            <option value="">-</option>
-            {finalNominados.map((nominado) => (
-              <option key={nominado.id} value={nominado.nombre}>
-                {nominado.nombre}
-              </option>
-            ))}
-          </select>
-          {selectedVotes.tercero && (
-            <div className={`nominado-display ${transitioning ? "transitioning" : ""}`} style={{ flex: "1", textAlign: "right" }}>
-              <img
-                src={displayNominados.tercero?.imageURL}
-                alt={selectedVotes.tercero}
-                className="nominado-image"
-              />
-            </div>
-          )}
+  if (loading) {
+    return (
+      <div className="voting-shell">
+        <div className="voting-loader-card">
+          <p className="section-kicker">Tofu del Ano</p>
+          <h1>Cargando finalistas</h1>
+          <p>Preparando el podio definitivo de la gala.</p>
         </div>
       </div>
+    );
+  }
 
-      <button className="button-voting" onClick={handleSubmitVotes} style={{ marginTop: "20px" }}>
-        Enviar Votos Finales
-      </button>
+  return (
+    <div className="voting-shell">
+      <section className="voting-header-card final">
+        <div>
+          <p className="section-kicker">Voto final</p>
+          <h1 className="VotingTitle">Tofu del Ano</h1>
+          <p className="subtitle">
+            Decide quien ha estado al nivel mas alto del grupo: mejor rendimiento, mejor trayectoria
+            general y mayor capacidad de aparecer cuando el ano lo pedia.
+          </p>
+        </div>
+
+        <div className="score-card">
+          <p className="score-card-label">Reparto de puntos</p>
+          <strong>
+            {scoreBreakdown.map(({ position, points }) => `${position}o: ${points}`).join(" · ")}
+          </strong>
+          <span>Podio obligatorio. No repitas finalista.</span>
+        </div>
+      </section>
+
+      {feedback.text ? (
+        <p className={`feedback-message ${feedback.type}`} aria-live="polite">
+          {feedback.text}
+        </p>
+      ) : null}
+
+      <section className="final-vote-grid">
+        {FINAL_POSITIONS.map((position) => {
+          const selectedNominee = displayNominados[position.key];
+
+          return (
+            <article key={position.key} className="final-vote-card">
+              <div className="final-vote-topline">
+                <span>{position.label}</span>
+                <strong>{getPointsForPosition(position.rank, 3, isPremium)} pts</strong>
+              </div>
+
+              <label className="vote-field">
+                <span>Selecciona un finalista</span>
+                <select
+                  className="vote-select"
+                  value={selectedVotes[position.key]}
+                  onChange={(event) => handleSelectVote(position.key, event.target.value)}
+                >
+                  <option value="">Selecciona</option>
+                  {finalNominados.map((nominado) => {
+                    const nomineeName = getNomineeName(nominado);
+
+                    return (
+                      <option key={`${position.key}-${nominado.id}`} value={nomineeName}>
+                        {nomineeName}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+
+              <div className="final-preview">
+                {selectedNominee ? (
+                  <>
+                    <img src={getNomineeImage(selectedNominee)} alt={getNomineeName(selectedNominee)} />
+                    <h2>{getNomineeName(selectedNominee)}</h2>
+                  </>
+                ) : (
+                  <div className="nominado-placeholder compact">Tu seleccion aparecera aqui</div>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
+      <div className="voting-actions centered">
+        <button className="button-next-back" onClick={() => navigate("/introfinal", { state: { accessMode, isPremium } })}>
+          Volver a la intro
+        </button>
+        <button className="button-voting" onClick={handleSubmitVotes} disabled={isSubmitting}>
+          {isSubmitting ? "Guardando voto final..." : "Enviar voto final"}
+        </button>
+      </div>
     </div>
   );
 };

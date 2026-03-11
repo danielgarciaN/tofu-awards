@@ -1,11 +1,9 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore"; // Importar Firestore
-import { getAuth } from "firebase/auth"; // Importar Auth
-import { getStorage } from "firebase/storage"; // Para Firebase Storage
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyA6i7mGHA5uGX1Ctlzt_jlBD8T0K_caSHw",
   authDomain: "tofu-awards.firebaseapp.com",
@@ -13,16 +11,27 @@ const firebaseConfig = {
   storageBucket: "tofu-awards.appspot.com",
   messagingSenderId: "384964093817",
   appId: "1:384964093817:web:c67af748562615b31eb1a8",
-  measurementId: "G-C0MBZPT2NV"
+  measurementId: "G-C0MBZPT2NV",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Inicializa Firestore y Auth
+if (typeof window !== "undefined") {
+  isSupported()
+    .then((supported) => {
+      if (supported) {
+        getAnalytics(app);
+      }
+    })
+    .catch(() => undefined);
+}
+
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-// Exporta el objeto `db` y `auth` para usarlos en otros archivos
-export { db, auth, storage };
+const googleProvider = new GoogleAuthProvider();
+
+googleProvider.setCustomParameters({ prompt: "select_account" });
+auth.useDeviceLanguage();
+
+export { app, auth, db, googleProvider, storage };

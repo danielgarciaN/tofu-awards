@@ -1,289 +1,359 @@
-import React, { useEffect, useState } from "react";
-import { db, auth } from "./../../firebase.js";
-import { doc, getDoc, getDocs, collection, updateDoc, setDoc } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { useLocation, useNavigate } from "react-router-dom";
-import './Voting.css';
-import useIsMobile from '../../hooks/useIsMobile';
+import { auth, db } from "./../../firebase.js";
+import "./Voting.css";
+import { getStoredAccessMode, isPremiumAccess } from "../../utils/accessMode";
+import {
+  getPointsBreakdown,
+  getPointsForPosition,
+  getRequiredPositions,
+  validateRankingSelection,
+} from "../../utils/voting";
+
+const getAwardName = (award) => award?.nombre || award?.name || "Premio";
+const getAwardDescription = (award) =>
+  award?.descripcion || award?.description || "Ordena a tus nominados y guarda tu voto.";
+const getNomineeName = (nominee) => nominee?.nombre || nominee?.name || "Nominado";
+const getNomineeImage = (nominee) => nominee?.imageURL || nominee?.imageUrl || nominee?.mediaUrl || "";
+const getNomineeVideo = (nominee) => nominee?.videoURL || nominee?.videoUrl || "";
+const getNomineeExtraImage = (nominee) => nominee?.mediaImageURL || nominee?.mediaUrl || "";
 
 const Voting = ({ premioIds }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const accessMode = location.state?.accessMode || getStoredAccessMode();
+  const isPremium = isPremiumAccess(accessMode) || Boolean(location.state?.isPremium);
   const [premio, setPremio] = useState(null);
   const [nominados, setNominados] = useState([]);
   const [selectedVotes, setSelectedVotes] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
   const [premiosData, setPremiosData] = useState({});
-  const user = auth.currentUser;
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMediaURL, setSelectedMediaURL] = useState("");
   const [isMediaVideo, setIsMediaVideo] = useState(false);
-  const [message, setMessage] = useState("");
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isPremium = location.state?.isPremium || false;
-  const isMobile = useIsMobile();
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const user = auth.currentUser;
 
-  const fetchPremioAndNominados = async () => {
-    setLoading(true);
-    const premioId = premioIds[currentIndex];
-    setMessage(""); // Limpia el mensaje al cambiar de premio
-    setSelectedVotes({}); // Resetea los votos seleccionados
-
-    if (premiosData[premioId]) {
-      setPremio(premiosData[premioId].premio);
-      setNominados(premiosData[premioId].nominados);
-      setLoading(false);
-      setTransitioning(false);
-      return;
-    }
-
-    try {
-      const premioDoc = await getDoc(doc(db, "premios", premioId));
-      if (premioDoc.exists()) {
-        const premioData = premioDoc.data();
-        const nominadosSnapshot = await getDocs(collection(doc(db, "premios", premioId), "nominados"));
-        const nominadosList = nominadosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-        setPremiosData((prevData) => ({
-          ...prevData,
-          [premioId]: { premio: premioData, nominados: nominadosList }
-        }));
-
-        setPremio(premioData);
-        setNominados(nominadosList);
-      } else {
-        console.error(`El premio con ID ${premioId} no existe.`);
-      }
-    } catch (error) {
-      console.error("Error al cargar el premio:", error);
-    } finally {
-      setLoading(false);
-      setTransitioning(false);
-    }
-  };
+  const requiredPositions = useMemo(() => getRequiredPositions(nominados.length), [nominados.length]);
+  const scoreBreakdown = useMemo(
+    () => getPointsBreakdown(nominados.length, isPremium),
+    [isPremium, nominados.length]
+  );
+  const currentAwardName = getAwardName(premio);
+  const scoreLegend = scoreBreakdown
+    .map(({ position, points }) => `${position}o: ${points} pts`)
+    .join(" · ");
 
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchPremioAndNominados = async () => {
+      setLoading(true);
+      setLoadError("");
+      setFeedback({ type: "", text: "" });
+      setSelectedVotes({});
+      const premioId = premioIds[currentIndex];
+
+      if (premiosData[premioId]) {
+        if (!cancelled) {
+          setPremio(premiosData[premioId].premio);
+          setNominados(premiosData[premioId].nominados);
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const premioRef = doc(db, "premios", premioId);
+        const premioDoc = await getDoc(premioRef);
+
+        if (!premioDoc.exists()) {
+          throw new Error(`El premio ${premioId} no existe.`);
+        }
+
+        const premioData = premioDoc.data();
+        const nominadosSnapshot = await getDocs(collection(premioRef, "nominados"));
+        const nominadosList = nominadosSnapshot.docs.map((snapshot) => ({
+          id: snapshot.id,
+          ...snapshot.data(),
+        }));
+
+        if (!cancelled) {
+          setPremiosData((previousData) => ({
+            ...previousData,
+            [premioId]: { premio: premioData, nominados: nominadosList },
+          }));
+          setPremio(premioData);
+          setNominados(nominadosList);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Error al cargar el premio:", error);
+          setLoadError("No hemos podido cargar esta categoria. Intentalo de nuevo.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchPremioAndNominados();
-  }, [currentIndex]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentIndex, premioIds, premiosData]);
 
   const handleSelectVote = (nominadoId, vote) => {
-    setSelectedVotes((prevVotes) => ({
-      ...prevVotes,
-      [nominadoId]: vote
+    setSelectedVotes((previousVotes) => ({
+      ...previousVotes,
+      [nominadoId]: vote,
     }));
-  };
-
-  const handleNext = () => {
-    setTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % premioIds.length);
-      setPremio(null);
-      setNominados([]);
-    }, 500);
-  };
-
-  const handlePrev = () => {
-    setTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + premioIds.length) % premioIds.length);
-      setPremio(null);
-      setNominados([]);
-    }, 500);
   };
 
   const handleShowMedia = (mediaURL, isVideo) => {
     setSelectedMediaURL(mediaURL);
     setIsMediaVideo(isVideo);
     setShowMediaModal(true);
-    if (isVideo) {
-      setTimeout(() => {
-        const videoElement = document.getElementById("modal-video");
-        if (videoElement) {
-          videoElement.play();
-        }
-      }, 200);
-    }
   };
 
   const handleCloseMedia = () => {
     setShowMediaModal(false);
     setSelectedMediaURL("");
+    setIsMediaVideo(false);
   };
 
   const handleSubmitVotes = async () => {
-    setMessage("");
-    const usedVotes = Object.values(selectedVotes);
-    const uniqueVotes = new Set(usedVotes);
-    const isFourNominados = nominados.length === 4;
-
-    if (
-      (isFourNominados && (usedVotes.length !== 4 || uniqueVotes.size !== 4 || !["1", "2", "3", "4"].every((pos) => usedVotes.includes(pos)))) ||
-      (!isFourNominados && (usedVotes.length !== 3 || uniqueVotes.size !== 3 || !["1", "2", "3"].every((pos) => usedVotes.includes(pos))))
-    ) {
-      setMessage(`Debes seleccionar un ${isFourNominados ? "1er, 2do, 3er y 4to" : "1er, 2do y 3er"} puesto antes de enviar.`);
+    if (!user) {
+      setFeedback({
+        type: "error",
+        text: "Tu sesion ha expirado. Vuelve a iniciar sesion.",
+      });
+      navigate("/login", { replace: true });
       return;
     }
 
+    if (!validateRankingSelection(selectedVotes, nominados.length)) {
+      setFeedback({
+        type: "error",
+        text: `Debes asignar ${requiredPositions.join(", ")} sin repetir posiciones antes de enviar.`,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedback({ type: "", text: "" });
+
     try {
       const userDocRef = doc(db, "users", user.uid);
+      const userAwardVotes = {};
 
-      for (const nominadoId in selectedVotes) {
-        const votePosition = selectedVotes[nominadoId];
-        let points;
-
-        switch (votePosition) {
-          case "1":
-            points = 5;
-            break;
-          case "2":
-            points = 3;
-            break;
-          case "3":
-            points = 1;
-            break;
-          case "4":
-            points = isFourNominados ? 0 : undefined;
-            break;
-          default:
-            points = 0;
-        }
-
-        if (isPremium) {
-          points *= 2;
-        }
+      for (const [nominadoId, votePosition] of Object.entries(selectedVotes)) {
+        const points = getPointsForPosition(votePosition, nominados.length, isPremium);
+        userAwardVotes[nominadoId] = points;
 
         const nominadoRef = doc(db, "premios", premioIds[currentIndex], "nominados", nominadoId);
-
         const nominadoDoc = await getDoc(nominadoRef);
-        const nominadoData = nominadoDoc.data();
-
+        const nominadoData = nominadoDoc.data() || {};
         const updatedVotedUsers = {
-          ...nominadoData.votedUsers,
+          ...(nominadoData.votedUsers || {}),
           [user.uid]: {
-            email: user.email,
+            email: user.email || "",
             timestamp: new Date().toISOString(),
             vote: points,
           },
         };
-
-        const totalPoints = Object.values(updatedVotedUsers).reduce((sum, userVote) => sum + userVote.vote, 0);
+        const totalPoints = Object.values(updatedVotedUsers).reduce(
+          (sum, userVote) => sum + (userVote.vote || 0),
+          0
+        );
 
         await updateDoc(nominadoRef, {
           votedUsers: updatedVotedUsers,
           votes: totalPoints,
         });
-
-        await setDoc(
-          userDocRef,
-          {
-            [premio.nombre]: {
-              [nominadoId]: points,
-            },
-          },
-          { merge: true }
-        );
       }
 
-      setMessage("¡Votos enviados con éxito!");
-      setSelectedVotes({});
+      await setDoc(
+        userDocRef,
+        {
+          [currentAwardName]: userAwardVotes,
+        },
+        { merge: true }
+      );
+
+      setFeedback({
+        type: "success",
+        text: `Voto guardado en ${currentAwardName}. Puedes cambiarlo mas adelante si hace falta.`,
+      });
     } catch (error) {
       console.error("Error al registrar los votos:", error);
-      setMessage("Error al registrar los votos. Intenta de nuevo.");
+      setFeedback({
+        type: "error",
+        text: "No hemos podido registrar tus votos. Intentalo otra vez.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleFinalVote = () => {
-    navigate("/introfinal");
-  };
+  if (loading) {
+    return (
+      <div className="voting-shell">
+        <div className="voting-loader-card">
+          <p className="section-kicker">Tofu Awards II</p>
+          <h1>Cargando categoria</h1>
+          <p>Estamos preparando los nominados y la tabla de puntos.</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading || !premio) {
-    return <div className="loading-container" style={{ backgroundColor: "black", color: "white" }}>Cargando...</div>;
+  if (loadError || !premio) {
+    return (
+      <div className="voting-shell">
+        <div className="voting-loader-card error">
+          <p className="section-kicker">Error de carga</p>
+          <h1>No se ha podido abrir esta votacion</h1>
+          <p>{loadError || "Intentalo de nuevo dentro de un momento."}</p>
+          <button className="button-next-back" onClick={() => navigate("/home")}>
+            Volver a la home
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className={`voting-container ${transitioning ? "transitioning" : ""}`}>
-      {!isMobile && (
-        <video autoPlay loop muted className="video-background">
-          <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
-          Tu navegador no soporta el elemento de video.
-        </video>
-      )}
+    <div className="voting-shell">
+      <section className="voting-header-card">
+        <div>
+          <p className="section-kicker">
+            Categoria {currentIndex + 1} de {premioIds.length}
+          </p>
+          <h1 className="VotingTitle">{currentAwardName}</h1>
+          <p className="subtitle">{getAwardDescription(premio)}</p>
+        </div>
 
-      <div className="progress-bar">
+        <div className="score-card">
+          <p className="score-card-label">{isPremium ? "Modo premium activo" : "Puntuacion activa"}</p>
+          <strong>{scoreLegend}</strong>
+          <span>El ultimo puesto no recibe puntos.</span>
+        </div>
+      </section>
+
+      <div className="progress-bar" aria-hidden="true">
         {premioIds.map((_, index) => (
-          <div
-            key={index}
-            className={`progress-dot ${currentIndex === index ? "active" : ""}`}
-          ></div>
+          <div key={index} className={`progress-dot ${currentIndex === index ? "active" : ""}`} />
         ))}
       </div>
 
-      <h1 className={`VotingTitle ${transitioning ? "transitioning" : ""}`}>{premio.nombre}</h1>
-      <p className={`subtitle ${transitioning ? "transitioning" : ""}`}>{premio.descripcion}</p>
+      {feedback.text ? (
+        <p className={`feedback-message ${feedback.type}`} aria-live="polite">
+          {feedback.text}
+        </p>
+      ) : null}
 
-      <div className={`nominados-container ${transitioning ? "transitioning" : ""}`}>
-        {nominados.map((nominado) => (
-          <div key={nominado.id} className={`nominado ${transitioning ? "transitioning" : ""}`}>
-            <h2>{nominado.nombre}</h2>
-            <img
-              src={nominado.imageURL}
-              alt={nominado.nombre}
-              className={transitioning ? "transitioning" : ""}
-            />
-            <div className="nominado-options">
-              {nominado.videoURL && (
-                <button
-                  className="videoButton"
-                  onClick={() => handleShowMedia(nominado.videoURL, true)}
+      <div className="nominados-container">
+        {nominados.map((nominado) => {
+          const nomineeName = getNomineeName(nominado);
+          const nomineeImage = getNomineeImage(nominado);
+          const nomineeVideo = getNomineeVideo(nominado);
+          const nomineeExtraImage = getNomineeExtraImage(nominado);
+
+          return (
+            <article key={nominado.id} className="nominado-card">
+              <div className="nominado-image-wrapper">
+                {nomineeImage ? (
+                  <img src={nomineeImage} alt={nomineeName} />
+                ) : (
+                  <div className="nominado-placeholder">Sin imagen</div>
+                )}
+              </div>
+
+              <div className="nominado-copy">
+                <h2>{nomineeName}</h2>
+                <div className="nominado-options">
+                  {nomineeVideo ? (
+                    <button className="videoButton" onClick={() => handleShowMedia(nomineeVideo, true)}>
+                      Ver video
+                    </button>
+                  ) : null}
+                  {nomineeExtraImage ? (
+                    <button className="videoButton" onClick={() => handleShowMedia(nomineeExtraImage, false)}>
+                      Ver imagen
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              <label className="vote-field">
+                <span>Posicion</span>
+                <select
+                  className="vote-select"
+                  onChange={(event) => handleSelectVote(nominado.id, event.target.value)}
+                  value={selectedVotes[nominado.id] || ""}
                 >
-                  Ver Video
-                </button>
-              )}
-              {nominado.mediaImageURL && (
-                <button
-                  className="videoButton"
-                  onClick={() => handleShowMedia(nominado.mediaImageURL, false)}
-                >
-                  Ver Imagen
-                </button>
-              )}
-              <select
-                className="vote-select"
-                onChange={(e) => handleSelectVote(nominado.id, e.target.value)}
-                value={selectedVotes[nominado.id] || "-"}
-              >
-                <option value="-">-</option>
-                {Array.from({ length: nominados.length }, (_, i) => (i + 1).toString()).map((pos) => (
-                  <option key={pos} value={pos}>{pos}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        ))}
+                  <option value="">Selecciona</option>
+                  {requiredPositions.map((position) => {
+                    const points = getPointsForPosition(position, nominados.length, isPremium);
+
+                    return (
+                      <option key={`${nominado.id}-${position}`} value={position}>
+                        {position}o puesto · {points} pts
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </article>
+          );
+        })}
       </div>
 
-      <div className="navigation-buttons">
-        <button className="button-next-back" onClick={handlePrev}>Atrás</button>
-        <button className="button-next-back" onClick={handleNext}>Siguiente</button>
+      <div className="voting-footer">
+        <div className="navigation-buttons">
+          <button
+            className="button-next-back"
+            onClick={() => setCurrentIndex((previousIndex) => Math.max(previousIndex - 1, 0))}
+            disabled={currentIndex === 0}
+          >
+            Categoria anterior
+          </button>
+          <button
+            className="button-next-back"
+            onClick={() =>
+              setCurrentIndex((previousIndex) => Math.min(previousIndex + 1, premioIds.length - 1))
+            }
+            disabled={currentIndex === premioIds.length - 1}
+          >
+            Siguiente categoria
+          </button>
+        </div>
+
+        <div className="voting-actions">
+          <button className="button-voting" onClick={handleSubmitVotes} disabled={isSubmitting}>
+            {isSubmitting ? "Guardando voto..." : "Guardar categoria"}
+          </button>
+          <button
+            className="button-final-vote"
+            onClick={() => navigate("/introfinal", { state: { accessMode, isPremium } })}
+          >
+            Ir al voto final
+          </button>
+        </div>
       </div>
 
-      <button className="button-voting" onClick={handleSubmitVotes} style={{ marginTop: "20px" }}>
-        Enviar Votos
-      </button>
-
-      <div className="final-vote-button-container">
-        <p className={`message ${message ? "visible" : ""}`}>{message}</p>
-
-        <button className="button-final-vote" onClick={handleFinalVote}>
-          Votar Premio Final
-        </button>
-      </div>
-
-      {showMediaModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+      {showMediaModal ? (
+        <div className="modal-overlay" onClick={handleCloseMedia}>
+          <div className="modal-content" onClick={(event) => event.stopPropagation()}>
             <button className="modal-close-button" onClick={handleCloseMedia}>
-              X
+              Cerrar
             </button>
             <div className="modal-media-container">
               {isMediaVideo ? (
@@ -292,12 +362,12 @@ const Voting = ({ premioIds }) => {
                   Tu navegador no soporta el video.
                 </video>
               ) : (
-                <img src={selectedMediaURL} alt="Imagen del nominado" />
+                <img src={selectedMediaURL} alt="Contenido del nominado" />
               )}
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

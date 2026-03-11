@@ -1,37 +1,38 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./Voting.css";
-import useIsMobile from "../../hooks/useIsMobile";
+import { getStoredAccessMode, isPremiumAccess } from "../../utils/accessMode";
 
 const IntroduccionFinalVote = () => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-
-  const handleContinueToVoting = () => {
-    navigate("/finalvote"); // Redirige al componente de votación final
-  };
+  const location = useLocation();
+  const accessMode = location.state?.accessMode || getStoredAccessMode();
+  const isPremium = isPremiumAccess(accessMode) || Boolean(location.state?.isPremium);
 
   return (
-    <div className="voting-container">
-      {!isMobile && (
-        <video autoPlay loop muted className="video-background">
-          <source src={require("./../../assets/videos/overlay (2).mp4")} type="video/mp4" />
-          Tu navegador no soporta el elemento de video.
-        </video>
-      )}
+    <div className="voting-shell intro-shell">
+      <section className="intro-card">
+        <p className="section-kicker">Ultima parada</p>
+        <h1 className="VotingTitle">Llega el voto a Tofu del Ano</h1>
+        <p className="tofu-description">
+          Este premio corona a quien mejor ha rendido en el conjunto del ano: nivel sostenido,
+          trayectoria general, impacto real en el grupo y capacidad de aparecer con autoridad cuando
+          tocaba. No es un voto simpatia. Es una decision de gala.
+        </p>
+        <p className="tofu-description secondary">
+          Piensa en quien ha mantenido la version mas fuerte de si mismo durante todo este tiempo. Si
+          estas en modo premium, la ponderacion especial ya esta aplicada al podio final.
+        </p>
 
-      <h1 className="VotingTitle">Premio Tofu del Año</h1>
-      <p className="tofu-description">
-        El Premio Tofu del Año es un reconocimiento especial que no busca premiar al más popular ni al que mejor te caiga, sino al que haya destacado por su actitud, esfuerzo y contribución a los momentos más memorables de este año. 
-        <br/><br/>
-        Rogamos encarecidamente que los votos se realicen de manera objetiva, evitando votar por uno mismo, y valorando quién realmente ha "performeado" mejor durante este tiempo. ¡Hagamos de este premio un verdadero homenaje al espíritu del Tofu del Año!
-      </p>
-
-
-
-      <button className="button-voting" onClick={handleContinueToVoting}>
-        Continuar con el Voto Final
-      </button>
+        <div className="intro-actions">
+          <button className="button-next-back" onClick={() => navigate("/voting", { state: { accessMode, isPremium } })}>
+            Volver a categorias
+          </button>
+          <button className="button-voting" onClick={() => navigate("/finalvote", { state: { accessMode, isPremium } })}>
+            Continuar al voto final
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

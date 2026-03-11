@@ -1,75 +1,121 @@
-.resultados-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #000000;
-    min-height: 100vh;
+.resultados-shell {
+  min-height: 100vh;
+  padding: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(209, 174, 95, 0.12), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(72, 123, 243, 0.16), transparent 26%),
+    linear-gradient(180deg, #060f1b 0%, #081526 46%, #050a12 100%);
+  color: var(--color-text-strong);
+}
+
+.resultados-header,
+.ganadores-list,
+.resultados-empty {
+  width: min(1200px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.resultados-header,
+.resultados-empty {
+  padding: 28px;
+  border-radius: 30px;
+  border: 1px solid var(--color-border);
+  background: rgba(7, 16, 31, 0.78);
+  box-shadow: var(--shadow-card);
+}
+
+.resultados-header p,
+.resultados-empty p {
+  color: var(--color-text-soft);
+  line-height: 1.75;
+}
+
+.results-kicker {
+  margin: 0 0 12px;
+  color: var(--color-gold);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.ResultadosTitle,
+.resultados-empty h1,
+.resultados-empty h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  line-height: 0.95;
+}
+
+.ganadores-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.ganador-card {
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid rgba(154, 174, 215, 0.16);
+  background: rgba(7, 16, 31, 0.76);
+  box-shadow: var(--shadow-card);
+}
+
+.premio-title {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.ganador-info {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+.ganadores-empatados {
+  display: grid;
+  gap: 16px;
+}
+
+.ganador-image {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 22px;
+}
+
+.ganador-image.placeholder {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(154, 174, 215, 0.22);
+}
+
+.ganador-name {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.empate-message,
+.no-ganadores {
+  color: var(--color-text-soft);
+}
+
+@media screen and (max-width: 720px) {
+  .resultados-shell {
+    padding: 16px;
   }
-  
-  .ResultadosTitle {
-    font-family: "Playfair Display", serif;
-    font-size: 3rem;
-    color: #ff9933;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .ganadores-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-  }
-  
+
+  .resultados-header,
+  .resultados-empty,
   .ganador-card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    text-align: center;
-    width: 250px;
-  }
-  
-  .premio-title {
-    font-family: "Playfair Display", serif;
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  .ganador-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .ganador-image {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 50%;
-    margin-bottom: 10px;
-  }
-  
-  .ganador-name {
-    font-family: "Playfair Display", serif;
-    font-size: 1.2rem;
-    color: #555;
-  }
-  
-  .no-ganadores {
-    font-family: "Playfair Display", serif;
-    font-size: 1.5rem;
-    color: #999;
-    text-align: center;
-  }
-  
-  .loading-container {
-    font-family: "Playfair Display", serif;
-    font-size: 1.5rem;
-    color: #999;
-    text-align: center;
     padding: 20px;
+    border-radius: 24px;
   }
-  
+}

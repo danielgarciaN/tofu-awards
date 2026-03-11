@@ -1,35 +1,39 @@
 import React from "react";
+import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import './Voting.css'; // Reutiliza los estilos de Voting.js
-import useIsMobile from '../../hooks/useIsMobile';
+import "./Voting.css";
+import { auth } from "../../firebase";
+import { clearStoredAccessMode } from "../../utils/accessMode";
 
 const Goodbye = () => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
 
-  const handleGoHome = () => {
-    navigate('/home'); // Redirige a la página de inicio
+  const handleLogout = async () => {
+    clearStoredAccessMode();
+    await signOut(auth);
   };
 
   return (
-    <div className="voting-container goodbye-container">
-      {!isMobile && (
-        <video autoPlay loop muted className="video-background">
-          <source src={require('./../../assets/videos/overlay (2).mp4')} type="video/mp4" />
-          Tu navegador no soporta el elemento de video.
-        </video>
-      )}
+    <div className="voting-shell goodbye-shell">
+      <section className="goodbye-card">
+        <p className="section-kicker">Voto registrado</p>
+        <h1 className="VotingTitle">Tu papel en la segunda gala ya esta entregado.</h1>
+        <p className="subtitle">
+          Gracias por votar. La ubicacion aun es secreta, el suspense sigue vivo y los resultados ya
+          tienen un poco mas de destino.
+        </p>
 
-      <div className="goodbye-content">
-        <h1 className="VotingTitle">¡Gracias por votar!</h1>
-        <h1 className="VotingTitle">Nos vemos en la gala</h1>
-        <button className="button-voting" onClick={handleGoHome} style={{ marginTop: "40px" }}>
-          Salir
-        </button>
-      </div>
+        <div className="goodbye-actions">
+          <button className="button-next-back" onClick={() => navigate("/home")}>
+            Volver a la home
+          </button>
+          <button className="button-voting" onClick={handleLogout}>
+            Cerrar sesion
+          </button>
+        </div>
+      </section>
     </div>
   );
 };
-
 
 export default Goodbye;

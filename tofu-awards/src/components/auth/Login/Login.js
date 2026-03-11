@@ -1,196 +1,433 @@
-import React, { useState } from "react";
-import { initializeApp } from "firebase/app"; 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, sendEmailVerification } from "firebase/auth"; 
-import { getFirestore, doc, setDoc } from "firebase/firestore"; 
-import imageG from "./../../../assets/google.svg"; 
-import { useNavigate } from "react-router-dom"; // Importa useNavigate
-import './Login.css';
-import useIsMobile from "../../../hooks/useIsMobile";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  getRedirectResult,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
+} from "firebase/auth";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import imageG from "./../../../assets/google.svg";
+import "./Login.css";
+import { auth, db, googleProvider } from "../../../firebase";
+import { clearStoredAccessMode } from "../../../utils/accessMode";
 
-// Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyA6i7mGHA5uGX1Ctlzt_jlBD8T0K_caSHw",
-  authDomain: "tofu-awards.firebaseapp.com",
-  projectId: "tofu-awards",
-  storageBucket: "tofu-awards.appspot.com",
-  messagingSenderId: "384964093817",
-  appId: "1:384964093817:web:c67af748562615b31eb1a8",
-  measurementId: "G-C0MBZPT2NV"
+const getFriendlyAuthMessage = (errorCode, isGoogleFlow = false) => {
+  switch (errorCode) {
+    case "auth/user-not-found":
+    case "auth/invalid-credential":
+      return "No hemos podido validar ese correo o esa contrasena.";
+    case "auth/wrong-password":
+      return "La contrasena no es correcta.";
+    case "auth/invalid-email":
+      return "Introduce un correo valido.";
+    case "auth/email-already-in-use":
+      return "Ese correo ya esta asociado a una cuenta.";
+    case "auth/weak-password":
+      return "La contrasena debe tener al menos 6 caracteres.";
+    case "auth/popup-blocked":
+      return "El navegador ha bloqueado la ventana emergente. Vamos a usar redireccion.";
+    case "auth/popup-closed-by-user":
+      return "Se ha cerrado la ventana antes de completar el acceso con Google.";
+    case "auth/unauthorized-domain":
+      return "Este dominio no esta autorizado en Firebase Auth. Revisa los dominios permitidos en consola.";
+    case "auth/account-exists-with-different-credential":
+      return isGoogleFlow
+        ? "Ya existe una cuenta con este correo usando otro metodo de acceso."
+        : "Ese correo ya tiene otro metodo de acceso asociado.";
+    default:
+      return "No se ha podido completar la autenticacion. Intentalo de nuevo.";
+  }
 };
 
-// Inicializa Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app); 
-
 const Login = () => {
+  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // Nuevo estado para confirmación de contraseña
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLogin, setIsLogin] = useState(true); 
-  const [message, setMessage] = useState(""); 
-  const navigate = useNavigate(); // Inicializa useNavigate
-  const isMobile = useIsMobile();
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isResolvingRedirect, setIsResolvingRedirect] = useState(true);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const isBusy = isSubmitting || isGoogleLoading || isResolvingRedirect;
+  const heroHighlights = useMemo(
+    () => [
+      "Segunda edicion, mas tarde que nunca.",
+      "Acceso optimizado para votar tambien desde movil.",
+      "Una experiencia mas limpia, estable y lista para la gala.",
+    ],
+    []
+  );
+
+  useEffect(() => {
+    clearStoredAccessMode();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const setupAuth = async () => {
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+        const result = await getRedirectResult(auth);
+
+        if (!isMounted || !result?.user) {
+          return;
+        }
+
+        await upsertUserProfile(result.user);
+        setFeedback({
+          type: "success",
+          text: "Acceso con Google completado. Entrando en la gala...",
+        });
+        navigate("/home", { replace: true });
+      } catch (error) {
+        if (isMounted) {
+          setFeedback({
+            type: "error",
+            text: getFriendlyAuthMessage(error.code, true),
+          });
+        }
+      } finally {
+        if (isMounted) {
+          setIsResolvingRedirect(false);
+        }
+      }
+    };
+
+    setupAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
+  const upsertUserProfile = async (user, extraData = {}) => {
+    const userRef = doc(db, "users", user.uid);
+    const userSnapshot = await getDoc(userRef);
+
+    await setDoc(
+      userRef,
+      {
+        email: user.email || "",
+        displayName: user.displayName || "",
+        lastLoginAt: serverTimestamp(),
+        ...(userSnapshot.exists() ? {} : { createdAt: serverTimestamp() }),
+        ...extraData,
+      },
+      { merge: true }
+    );
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setMessage("");
+  const resetFeedback = () => setFeedback({ type: "", text: "" });
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    resetFeedback();
+    setIsSubmitting(true);
+
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Verificamos si el usuario ha verificado su email
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      const { user } = userCredential;
+
       if (!user.emailVerified) {
-        setMessage("Por favor, verifica tu correo electrónico antes de iniciar sesión.");
+        setFeedback({
+          type: "error",
+          text: "Antes de entrar debes verificar tu correo electronico.",
+        });
+        setIsSubmitting(false);
         return;
       }
 
-      console.log("Usuario autenticado:", user);
-      setMessage(`¡Inicio de sesión exitoso! Usuario: ${user.email}`);
-      navigate('/password-prompt'); // Redirige a la página de PasswordPrompt
+      await upsertUserProfile(user);
+      setFeedback({
+        type: "success",
+        text: "Sesion iniciada. Redirigiendo a la home...",
+      });
+      navigate("/home", { replace: true });
     } catch (error) {
-      console.error("Error al iniciar sesión:", error.code, error.message);
-      if (error.code === 'auth/user-not-found') {
-        setMessage("No hay un usuario registrado con ese correo electrónico.");
-      } else if (error.code === 'auth/wrong-password') {
-        setMessage("La contraseña es incorrecta.");
-      } else {
-        setMessage("Error al iniciar sesión: " + error.message);
-      }
+      setFeedback({
+        type: "error",
+        text: getFriendlyAuthMessage(error.code),
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    // Verifica que las contraseñas coincidan
-    if (password !== confirmPassword) {
-      setMessage("Las contraseñas no coinciden");
+  const handleSignup = async (event) => {
+    event.preventDefault();
+    resetFeedback();
+
+    if (password.length < 6) {
+      setFeedback({
+        type: "error",
+        text: "La contrasena debe tener al menos 6 caracteres.",
+      });
       return;
     }
-  
-    try {
-      // Crear un nuevo usuario con email y contraseña
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-  
-      // Enviar email de verificación
-      await sendEmailVerification(user);
-      setMessage(`¡Registro exitoso! Verifica tu correo electrónico para continuar.`);
-  
-      // Guardar información adicional en Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        createdAt: new Date(),
+
+    if (password !== confirmPassword) {
+      setFeedback({
+        type: "error",
+        text: "Las contrasenas no coinciden.",
       });
-  
-      console.log("Usuario registrado:", user);
-      navigate('/login'); // Redirige a la página de inicio de sesión
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const { user } = userCredential;
+
+      await sendEmailVerification(user);
+      await upsertUserProfile(user, { createdAt: serverTimestamp() });
+      setFeedback({
+        type: "success",
+        text: "Cuenta creada. Revisa tu correo y verifica la direccion antes de iniciar sesion.",
+      });
+      setIsLogin(true);
+      setPassword("");
+      setConfirmPassword("");
     } catch (error) {
-      console.error("Error al registrarse:", error.message);
-      setMessage("Error al registrarse: " + error.message);
+      setFeedback({
+        type: "error",
+        text: getFriendlyAuthMessage(error.code),
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
+
   const handleResetPassword = async () => {
-    setMessage("");
+    resetFeedback();
+
+    if (!email.trim()) {
+      setFeedback({
+        type: "error",
+        text: "Escribe primero tu correo para enviarte el enlace de recuperacion.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await sendPasswordResetEmail(auth, email);
-      setMessage("Email de restablecimiento de contraseña enviado");
+      await sendPasswordResetEmail(auth, email.trim());
+      setFeedback({
+        type: "success",
+        text: "Te hemos enviado un enlace para restablecer la contrasena.",
+      });
     } catch (error) {
-      console.error("Error al enviar el email de restablecimiento:", error.message);
-      setMessage("Error al enviar el email de restablecimiento");
+      setFeedback({
+        type: "error",
+        text: getFriendlyAuthMessage(error.code),
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setMessage("");
-    const provider = new GoogleAuthProvider();
+    resetFeedback();
+    setIsGoogleLoading(true);
+
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log("Usuario autenticado con Google:", user);
-      setMessage(`¡Inicio de sesión con Google exitoso! Usuario: ${user.email}`);
-      navigate('/password-prompt'); // Redirige a la página de PasswordPrompt
+      await setPersistence(auth, browserLocalPersistence);
+
+      const prefersRedirect =
+        typeof window !== "undefined" &&
+        (window.matchMedia("(max-width: 768px)").matches ||
+          /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent));
+
+      if (prefersRedirect) {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
+      const result = await signInWithPopup(auth, googleProvider);
+      await upsertUserProfile(result.user);
+      setFeedback({
+        type: "success",
+        text: "Acceso con Google completado. Entrando en la gala...",
+      });
+      navigate("/home", { replace: true });
     } catch (error) {
-      console.error("Error al iniciar sesión con Google:", error.message);
-      setMessage("Error al iniciar sesión con Google");
+      const canFallbackToRedirect = [
+        "auth/popup-blocked",
+        "auth/popup-closed-by-user",
+        "auth/cancelled-popup-request",
+        "auth/operation-not-supported-in-this-environment",
+      ].includes(error.code);
+
+      if (canFallbackToRedirect) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError) {
+          setFeedback({
+            type: "error",
+            text: getFriendlyAuthMessage(redirectError.code, true),
+          });
+        }
+      } else {
+        setFeedback({
+          type: "error",
+          text: getFriendlyAuthMessage(error.code, true),
+        });
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
   return (
     <div className="login-page">
-      {!isMobile && (
-        <video autoPlay loop muted className="video-background">
-          <source src={require('./../../../assets/videos/login.mp4')} type="video/mp4" />
-          Tu navegador no soporta el elemento de video.
-        </video>
-      )}
-      <div className="login-container">
+      <div className="login-ambient" />
+      <section className="login-hero">
+        <p className="login-kicker">Tofu Awards II</p>
+        <h1>La segunda gala ya esta en marcha.</h1>
+        <p className="login-lead">
+          Llega mas tarde que nunca, con mas historias, mas recuerdos y una novedad importante:
+          ahora toda la votacion esta preparada tambien para movil.
+        </p>
+        <ul className="login-highlights">
+          {heroHighlights.map((highlight) => (
+            <li key={highlight}>{highlight}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="login-container">
         <div className="login-form">
-          <h2>{isLogin ? "Iniciar Sesión" : "Registrarse"}</h2>
-          {message && <div className="message-container">{message}</div>} {/* Mensaje en pantalla */}
+          <p className="login-panel-kicker">{isLogin ? "Acceso privado" : "Registro"}</p>
+          <h2>{isLogin ? "Entra en la gala" : "Crea tu acceso"}</h2>
+          <p className="login-panel-copy">
+            {isLogin
+              ? "Accede con tu cuenta para entrar directamente en la home y continuar con las votaciones."
+              : "Registra tu cuenta para participar en la segunda edicion de los Tofu Awards."}
+          </p>
+
           <form onSubmit={isLogin ? handleLogin : handleSignup}>
-            <div className="input-field">
+            <label className="input-field">
+              <span>Correo electronico</span>
               <input
                 type="email"
-                placeholder="Email"
+                autoComplete="email"
+                placeholder="tu@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
-            </div>
-            <div className="input-field">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <i className={`eye-icon ${showPassword ? "bx bx-show" : "bx bx-hide"}`} onClick={togglePasswordVisibility}></i>
-            </div>
-            {!isLogin && ( // Campo de confirmación de contraseña solo en el registro
-              <div className="input-field">
+            </label>
+
+            <label className="input-field">
+              <span>Contrasena</span>
+              <div className="password-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  placeholder="Introduce tu contrasena"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   required
                 />
-                <i className={`eye-icon ${showPassword ? "bx bx-show" : "bx bx-hide"}`} onClick={togglePasswordVisibility}></i>
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+                >
+                  {showPassword ? "Ocultar" : "Mostrar"}
+                </button>
               </div>
+            </label>
+
+            {!isLogin && (
+              <label className="input-field">
+                <span>Confirmar contrasena</span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Repite tu contrasena"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  required
+                />
+              </label>
             )}
-            <div className="form-link">
-              <a href="#" className="forgot-pass" onClick={handleResetPassword}>¿Olvidaste la contraseña?</a>
+
+            <div className="login-actions-row">
+              <button
+                type="button"
+                className="text-button"
+                onClick={handleResetPassword}
+                disabled={isBusy}
+              >
+                Recuperar contrasena
+              </button>
             </div>
+
+            {feedback.text ? (
+              <div className={`message-container ${feedback.type}`} aria-live="polite">
+                {feedback.text}
+              </div>
+            ) : null}
+
             <div className="button-field">
-              <button type="submit">{isLogin ? "Iniciar Sesión" : "Registrarse"}</button>
+              <button type="submit" disabled={isBusy}>
+                {isBusy
+                  ? "Procesando..."
+                  : isLogin
+                    ? "Entrar en Tofu Awards"
+                    : "Crear cuenta"}
+              </button>
             </div>
           </form>
+
           <div className="form-link">
-            <span>
-              {isLogin ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"} 
-              <a href="#" className="signup-link" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? "Registrate" : "Iniciar Sesión"}
-              </a>
-            </span>
-          </div>
-          <div className="divider">O</div>
-          <div className="social-login">
-            <button className="google-login" onClick={handleGoogleLogin}>
-              <img src={imageG} alt="Google" style={{ width: '40px', marginRight: '0.5rem' }} />
-              Iniciar sesión con Google
+            <span>{isLogin ? "Aun no tienes cuenta?" : "Ya tienes cuenta?"}</span>
+            <button
+              type="button"
+              className="text-button inline"
+              onClick={() => {
+                resetFeedback();
+                setIsLogin((current) => !current);
+                setPassword("");
+                setConfirmPassword("");
+              }}
+              disabled={isBusy}
+            >
+              {isLogin ? "Registrate" : "Inicia sesion"}
             </button>
           </div>
+
+          <div className="divider">
+            <span>o</span>
+          </div>
+
+          <div className="social-login">
+            <button className="google-login" onClick={handleGoogleLogin} disabled={isBusy}>
+              <img src={imageG} alt="" aria-hidden="true" />
+              {isGoogleLoading ? "Conectando con Google..." : "Continuar con Google"}
+            </button>
+          </div>
+
+          <p className="login-footnote">
+            Si el popup de Google falla en produccion o en movil, la app cambiara automaticamente a
+            redireccion segura.
+          </p>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

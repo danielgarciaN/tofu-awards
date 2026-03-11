@@ -1,208 +1,359 @@
-/* Estilo general para la página de login */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap");
+
 .login-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 460px);
+  min-height: 100vh;
+  padding: 40px;
+  gap: 32px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(218, 181, 105, 0.16), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(58, 109, 240, 0.18), transparent 32%),
+    linear-gradient(145deg, #07111f 0%, #0d1d35 50%, #050913 100%);
+}
+
+.login-ambient {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+  pointer-events: none;
+}
+
+.login-hero,
+.login-container {
+  position: relative;
+  z-index: 1;
+}
+
+.login-hero {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  position: relative;
   justify-content: center;
-  width: 100%;
-  height: 100vh; /* Usa el 100% de la altura de la ventana */
-  overflow: hidden;
+  max-width: 640px;
+  padding: 24px 12px 24px 8px;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-
-
-.message-container{
-  color: #eeff00
+.login-kicker,
+.login-panel-kicker {
+  margin: 0 0 12px;
+  color: var(--color-gold);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
 }
 
-/* Contenedor del formulario */
-.login-container {
-  font-family: "Playfair Display", serif;
-  width: 350px;
-  padding: 2rem;
-  background-color: #000000; /* Fondo negro mate */
-  border-radius: 8px;
-  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2); /* Sombra más suave */
-  backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo */
-  border: 3px solid #b8860b; /* Borde dorado oscuro */
-}
-
-.video-background {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  z-index: -1; /* Asegura que el video esté detrás del contenido */
-  transform: translate(-50%, -50%);
-}
-
-/* Encabezado del formulario */
+.login-hero h1,
 .login-form h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #b8860b; /* Letras doradas */
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--color-text-strong);
+  line-height: 0.95;
 }
 
-/* Campo de entrada */
+.login-hero h1 {
+  font-size: clamp(3.4rem, 6vw, 5.6rem);
+  max-width: 10ch;
+}
+
+.login-lead,
+.login-panel-copy,
+.login-footnote {
+  color: var(--color-text-soft);
+  line-height: 1.7;
+}
+
+.login-lead {
+  max-width: 56ch;
+  margin: 24px 0 0;
+  font-size: 1.06rem;
+}
+
+.login-highlights {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.login-highlights li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-strong);
+  font-weight: 500;
+}
+
+.login-highlights li::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-gold), #efe1a4);
+  box-shadow: 0 0 20px rgba(209, 174, 95, 0.4);
+  flex-shrink: 0;
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form {
+  width: min(100%, 460px);
+  padding: 34px 32px 30px;
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  background: rgba(7, 16, 31, 0.82);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+}
+
+.login-form h2 {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+}
+
+.login-panel-copy {
+  margin: 16px 0 28px;
+}
+
 .input-field {
-  position: relative;
-  margin-bottom: 1rem;
-  
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.input-field span {
+  color: var(--color-text-strong);
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .input-field input {
-  width: 93%; /* Cambiado a 100% para usar todo el ancho */
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 16px;
+  border: 1px solid rgba(154, 174, 215, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-strong);
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
 }
 
-/* Icono para mostrar/ocultar contraseña */
-.eye-icon {
+.input-field input::placeholder {
+  color: rgba(221, 230, 255, 0.46);
+}
+
+.input-field input:focus {
+  outline: none;
+  border-color: rgba(209, 174, 95, 0.7);
+  box-shadow: 0 0 0 4px rgba(209, 174, 95, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 108px;
+}
+
+.toggle-password {
   position: absolute;
-  right: 10px;
   top: 50%;
+  right: 10px;
   transform: translateY(-50%);
-  font-size: 20px;
-  color: #888;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-soft);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.toggle-password:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--color-text-strong);
+}
+
+.login-actions-row,
+.form-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.form-link {
+  margin-top: 22px;
+  color: var(--color-text-soft);
+}
+
+.text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-gold);
+  font: inherit;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* Enlace para recuperar contraseña */
-.forgot-pass {
-  display: block;
-  text-align: right;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-  color: #b8860b;
-  text-decoration: none;
-  
+.text-button.inline {
+  margin-left: 8px;
 }
 
-.forgot-pass:hover {
-  text-decoration: underline;
+.text-button:hover:not(:disabled) {
+  color: var(--color-gold-soft);
 }
 
-/* Estilo para los botones */
 .button-field {
-  margin-bottom: 1.5rem;
+  margin-top: 20px;
+}
+
+.button-field button,
+.google-login {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 16px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .button-field button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #b8860b;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  font-family: "Playfair Display", serif;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  background: linear-gradient(135deg, var(--color-gold) 0%, #f2e7ae 100%);
+  color: #091425;
+  box-shadow: 0 16px 30px rgba(209, 174, 95, 0.22);
 }
 
-.button-field button:hover {
-  background-color: #a6750a; /* Color un poco más oscuro */
-  transform: scale(1.05); /* Aumenta el tamaño un poco */
+.button-field button:hover:not(:disabled),
+.google-login:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
-/* Estilo para los enlaces de formulario */
-.form-link {
-  text-align: center;
-  color: #ffffff;
-  margin-bottom: 1.5rem;
+.button-field button:disabled,
+.google-login:disabled,
+.text-button:disabled,
+.toggle-password:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
-.form-link span {
-  font-size: 0.9rem;
-}
-
-.form-link a {
-  color: #b8860b;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.form-link a:hover {
-  text-decoration: underline;
-}
-
-/* Separador */
 .divider {
-  text-align: center;
-  margin: 1.5rem 0;
-  color: #b8860b; /* Letras doradas */
-}
-
-/* Estilo para el login social */
-.social-login {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.facebook-login, .google-login {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  font-family: "Playfair Display", serif;
-  transition: background-color 0.3s ease;
+  gap: 14px;
+  margin: 24px 0 18px;
+  color: rgba(221, 230, 255, 0.48);
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
 }
 
-/* Estilos para Facebook */
-.facebook-login i {
-  margin-right: 0.5rem;
-  font-size: 20px;
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(154, 174, 215, 0.18);
 }
 
-/* Estilos para Google */
 .google-login {
-  background-color: white;
-  color: #333;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-strong);
+  border: 1px solid rgba(154, 174, 215, 0.24);
 }
 
 .google-login img {
-  width: 20px;
-  margin-right: 0.5rem;
+  width: 22px;
+  height: 22px;
 }
 
-/* Efecto hover para botones de social login */
-.google-login:hover, .facebook-login:hover {
-  background-color: #9b9da0;
-  transform: scale(1.05)
+.message-container {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
+.message-container.success {
+  background: rgba(53, 168, 107, 0.16);
+  border: 1px solid rgba(53, 168, 107, 0.28);
+  color: #b8efd1;
+}
 
+.message-container.error {
+  background: rgba(214, 80, 80, 0.16);
+  border: 1px solid rgba(214, 80, 80, 0.28);
+  color: #ffd4d4;
+}
 
+.login-footnote {
+  margin: 18px 0 0;
+  font-size: 0.9rem;
+}
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 980px) {
   .login-page {
-    min-height: 100vh;
-    height: auto;
-    padding: 16px;
-    background: #1b0f12;
+    grid-template-columns: 1fr;
+    padding: 24px;
   }
 
-  .login-container {
-    width: 100%;
-    max-width: 360px;
-    padding: 1.25rem;
+  .login-hero {
+    padding: 16px 0 0;
   }
 
-  .input-field input {
-    width: 100%;
-    box-sizing: border-box;
+  .login-hero h1 {
+    max-width: none;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .login-page {
+    padding: 18px;
+    gap: 20px;
+  }
+
+  .login-form {
+    padding: 26px 20px 22px;
+    border-radius: 22px;
+  }
+
+  .login-hero {
+    padding: 4px 0 0;
+  }
+
+  .login-highlights {
+    gap: 10px;
+  }
+
+  .login-actions-row,
+  .form-link {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .text-button.inline {
+    margin-left: 0;
   }
 }

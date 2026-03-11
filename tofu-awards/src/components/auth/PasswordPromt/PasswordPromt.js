@@ -1,54 +1,104 @@
-// src/components/auth/PasswordPrompt.js
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./PasswordPrompt.css";
+import { ACCESS_MODES, setStoredAccessMode } from "../../../utils/accessMode";
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './PasswordPrompt.css';
-import useIsMobile from '../../../hooks/useIsMobile';
+const SECRET_PASSWORD = "Jairorebozado";
+const PREMIUM_PASSWORD = "premium";
+const RESULTS_PASSWORD = "cigrunet";
 
 const PasswordPrompt = () => {
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const SECRET_PASSWORD = 'XaviButanero';
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const [password, setPassword] = useState("");
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
     if (password === SECRET_PASSWORD) {
-      navigate('/home');
-    } else if (password === 'premium') {
-      navigate('/home', { state: { isPremium: true } });
-    } else if (password === "cigrunet") {
-      navigate('/resultados'); // Redirige a la página de Resultados
-    }    
-    else {
-      setErrorMessage('Contraseña incorrecta. Intentalo de nuevo.');
+      setStoredAccessMode(ACCESS_MODES.STANDARD);
+      navigate("/home", {
+        replace: true,
+        state: {
+          accessUnlocked: true,
+          accessMode: ACCESS_MODES.STANDARD,
+        },
+      });
+      return;
     }
+
+    if (password === PREMIUM_PASSWORD) {
+      setStoredAccessMode(ACCESS_MODES.PREMIUM);
+      navigate("/home", {
+        replace: true,
+        state: {
+          accessUnlocked: true,
+          accessMode: ACCESS_MODES.PREMIUM,
+        },
+      });
+      return;
+    }
+
+    if (password === RESULTS_PASSWORD) {
+      navigate("/resultados", { replace: true });
+      return;
+    }
+
+    setFeedback({
+      type: "error",
+      text: "Clave incorrecta. Revisa la contrasena e intentalo otra vez.",
+    });
   };
 
   return (
-    <div className="background">
-      {!isMobile && (
-        <video autoPlay loop muted className="video-background">
-          <source src={require('./../../../assets/videos/overlay.mp4')} type="video/mp4" />
-          Tu navegador no soporta el elemento de video.
-        </video>
-      )}
-      <div className="password-container">
-        <h1 className="title">TOFU AWARDS</h1>
-        <h2 className="subtitle">INTRODUCE LA CONTRASEÑA SECRETA</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            className='inputPass'
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Contraseña secreta"
-            required
-          />
-          <button className='accesButton' type="submit">Acceder</button>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+    <div className="password-page">
+      <div className="password-ambient" />
+      <div className="password-card">
+        <p className="password-kicker">Acceso privado</p>
+        <h1>Panel de acceso especial</h1>
+        <p className="password-copy">
+          Esta pantalla ya no interrumpe el flujo principal. Solo se usa para desbloquear modos
+          especiales o consultar resultados protegidos.
+        </p>
+
+        <form className="password-form" onSubmit={handleSubmit}>
+          <label className="password-field">
+            <span>Clave privada</span>
+            <input
+              className="inputPass"
+              type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                if (feedback.text) {
+                  setFeedback({ type: "", text: "" });
+                }
+              }}
+              placeholder="Introduce la clave"
+              required
+            />
+          </label>
+
+          {feedback.text ? (
+            <p className={`password-feedback ${feedback.type}`} aria-live="polite">
+              {feedback.text}
+            </p>
+          ) : null}
+
+          <div className="password-actions">
+            <button className="secondary-access-button" type="button" onClick={() => navigate("/home")}>
+              Volver a la home
+            </button>
+            <button className="accesButton" type="submit">
+              Desbloquear
+            </button>
+          </div>
         </form>
+
+        <p className="password-note">
+          `Jairorebozado` mantiene el acceso privado estandar. `premium` activa la ponderacion
+          premium. `cigrunet` conserva la entrada a resultados.
+        </p>
       </div>
     </div>
   );
